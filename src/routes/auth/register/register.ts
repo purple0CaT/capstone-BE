@@ -1,4 +1,3 @@
-import e from "cors";
 import express from "express";
 import createHttpError from "http-errors";
 import UserSchema from "../../users/schema";

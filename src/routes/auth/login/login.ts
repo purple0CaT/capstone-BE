@@ -1,8 +1,9 @@
-import e from "cors";
 import express from "express";
 import createHttpError from "http-errors";
+import passport from "passport";
 import UserSchema from "../../users/schema";
 import { generateJWT } from "../tokens/token";
+process.env.TS_NODE_DEV && require("dotenv").config();
 
 const loginRoute = express.Router();
 
@@ -22,5 +23,22 @@ loginRoute.post("/", async (req, res, next) => {
     next(createHttpError(500));
   }
 });
+//
+loginRoute.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+loginRoute.get(
+  "/googleRed",
+  passport.authenticate("google"),
+  async (req: any, res, next) => {
+    try {
+      res.send({ user: req.user.user, tokens: req.user.tokens });
+      res.redirect(`${process.env.URL}`);
+    } catch (error) {
+      next(createHttpError(500));
+    }
+  }
+);
 
 export default loginRoute;

@@ -7,7 +7,12 @@ const { Schema, model } = mongoose;
 const UserSchema = new Schema<UserType, UserSchemaType>({
   firstname: { type: String, required: true },
   lastname: { type: String, required: true },
-  password: { type: String, required: true },
+  password: {
+    type: String,
+    required: function (this: any) {
+      return !Boolean(this.fbId || this.googleId);
+    },
+  },
   email: { type: String, required: true },
   avatar: {
     type: String,
@@ -15,7 +20,12 @@ const UserSchema = new Schema<UserType, UserSchemaType>({
     default:
       "https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png",
   },
-  googleId: { type: String, required: false },
+  googleId: {
+    type: String,
+    required: function (this: any) {
+      return !Boolean(this.fbId || this.password);
+    },
+  },
   fbId: {
     type: String,
     required: function (this: any) {
