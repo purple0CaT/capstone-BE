@@ -14,8 +14,10 @@ export interface UserType {
   fbId?: string;
   refreshToken?: any;
   socket?: string;
-  cart: string;
-  creator: string;
+  cart?: string;
+  shop?: string;
+  creator?: string;
+  booking?: string;
 }
 export interface UserSchemaType extends Model<UserType> {
   CheckCredentials(email: string, password: string): any;

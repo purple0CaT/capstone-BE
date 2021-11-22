@@ -24,6 +24,16 @@ postRoute.get("/", authJWT, async (req, res, next) => {
     next(createHttpError(500));
   }
 });
+postRoute.get("/:postId", authJWT, async (req, res, next) => {
+  try {
+    const post = await PostSchema.findById(req.params.postId).populate(
+      "author"
+    );
+    res.send(post);
+  } catch (error) {
+    next(createHttpError(500));
+  }
+});
 //
 postRoute.post(
   "/",
@@ -50,7 +60,7 @@ postRoute.put("/:postId", async (req, res, next) => {
       req.params.postId,
       req.body,
       { new: true }
-    );
+    ).populate("author");
     res.send(post);
   } catch (error) {
     next(createHttpError(500, error as any));

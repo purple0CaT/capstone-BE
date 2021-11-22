@@ -35,6 +35,8 @@ const UserSchema = new Schema<UserType, UserSchemaType>({
   socket: { type: String, required: false },
   cart: { type: String, required: false },
   creator: { type: String, required: false },
+  booking: { type: String },
+  shop: { type: Schema.Types.ObjectId, ref: "Shop" },
   refreshToken: { type: String, required: false },
 });
 //
