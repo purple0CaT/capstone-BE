@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
+import { UserSchemaType, UserType } from "../../types/user";
 //
 const { Schema, model } = mongoose;
 //
-const UserSchema = new Schema({
-  firstame: { type: String, required: true },
+const UserSchema = new Schema<UserType, UserSchemaType>({
+  firstname: { type: String, required: true },
   lastname: { type: String, required: true },
   password: { type: String, required: true },
   email: { type: String, required: true },
@@ -31,7 +32,7 @@ UserSchema.pre("save", async function () {
   const user = this;
   const pass = user.password;
   if (user.isModified("password")) {
-    user.password = await bcrypt.hash(pass, 10);
+    user.password = await bcrypt.hash(pass as any, 10);
   }
 });
 //
@@ -48,7 +49,7 @@ UserSchema.methods.toJSON = function () {
 UserSchema.statics.CheckCredentials = async function (email, pass) {
   const user = await this.findOne({ email });
   if (user) {
-    const isMatch = await bcrypt.compare(pass, user.password);
+    const isMatch = await bcrypt.compare(pass, user.password as any);
     if (isMatch) {
       return user;
     } else {
@@ -59,4 +60,4 @@ UserSchema.statics.CheckCredentials = async function (email, pass) {
   }
 };
 
-export default model("User", UserSchema);
+export default model<UserType, UserSchemaType>("User", UserSchema);

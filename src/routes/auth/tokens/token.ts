@@ -1,12 +1,12 @@
 import createHttpError from "http-errors";
 import jwt from "jsonwebtoken";
+import { UserType } from "../../../types/user";
 import UserSchema from "../../users/schema";
 process.env.TS_NODE_DEV && require("dotenv").config();
 //
-export const generateJWT = async (user: any) => {
+export const generateJWT = async (user: UserType) => {
   const accessToken = await createJWT({ _id: user._id });
   const refreshToken = await createRefreshJWT({ _id: user._id });
-  console.log(accessToken, refreshToken);
   return { accessToken, refreshToken };
 };
 //  GENERATE TOKENS

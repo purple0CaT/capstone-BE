@@ -6,9 +6,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.app = void 0;
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
+const errorHandlers_1 = require("./errorHandler/errorHandlers");
+const register_1 = __importDefault(require("./routes/auth/register/register"));
 //
 exports.app = (0, express_1.default)();
 //
 exports.app.use((0, cors_1.default)());
 exports.app.use(express_1.default.json());
 //
+exports.app.use("/register", register_1.default);
+//
+exports.app.use(errorHandlers_1.generalErrHandl);
+exports.app.use(errorHandlers_1.catchAllHandler);
