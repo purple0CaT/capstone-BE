@@ -1,0 +1,30 @@
+{
+  "name": "capstone-be",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "watch": "jest --watchAll",
+    "dev": "ts-node-dev ./src",
+    "start": "node ./build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/express": "^4.17.13",
+    "@types/express-list-endpoints": "^6.0.0",
+    "@types/http-errors": "^1.8.1",
+    "bcrypt": "^5.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "express-list-endpoints": "^6.0.0",
+    "http-errors": "^1.8.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.0.13",
+    "socket.io": "^4.4.0",
+    "ts-node-dev": "^1.1.8"
+  }
+}
