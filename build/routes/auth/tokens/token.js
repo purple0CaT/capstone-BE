@@ -21,7 +21,6 @@ process.env.TS_NODE_DEV && require("dotenv").config();
 const generateJWT = (user) => __awaiter(void 0, void 0, void 0, function* () {
     const accessToken = yield createJWT({ _id: user._id });
     const refreshToken = yield createRefreshJWT({ _id: user._id });
-    console.log(accessToken, refreshToken);
     return { accessToken, refreshToken };
 });
 exports.generateJWT = generateJWT;

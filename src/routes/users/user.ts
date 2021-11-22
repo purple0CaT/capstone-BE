@@ -46,9 +46,27 @@ userRoute.put(
       );
       res.send(user);
     } catch (error) {
-      next(createHttpError(500));
+      next(createHttpError(500, error as any));
     }
   }
 );
+userRoute.put("/", authJWT, async (req: any, res, next) => {
+  try {
+    const user = await UserSchema.findByIdAndUpdate(req.user._id, req.body, {
+      new: true,
+    });
+    res.send(user);
+  } catch (error) {
+    next(createHttpError(500, error as any));
+  }
+});
+userRoute.delete("/", authJWT, async (req: any, res, next) => {
+  try {
+    const user = await UserSchema.findByIdAndDelete(req.user._id);
+    res.status(201).send({ message: "Deletet!" });
+  } catch (error) {
+    next(createHttpError(500, error as any));
+  }
+});
 
 export default userRoute;

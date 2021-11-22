@@ -18,16 +18,26 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const { Schema, model } = mongoose_1.default;
 //
 const UserSchema = new Schema({
-    firstame: { type: String, required: true },
+    firstname: { type: String, required: true },
     lastname: { type: String, required: true },
-    password: { type: String, required: true },
+    password: {
+        type: String,
+        required: function () {
+            return !Boolean(this.fbId || this.googleId);
+        },
+    },
     email: { type: String, required: true },
     avatar: {
         type: String,
         required: false,
         default: "https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png",
     },
-    googleId: { type: String, required: false },
+    googleId: {
+        type: String,
+        required: function () {
+            return !Boolean(this.fbId || this.password);
+        },
+    },
     fbId: {
         type: String,
         required: function () {

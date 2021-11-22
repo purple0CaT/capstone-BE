@@ -20,8 +20,11 @@ const registerRoute = express_1.default.Router();
 //
 registerRoute.post("/", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const checkEmail = yield schema_1.default.findOne({ email: req.body.email });
+        if (checkEmail)
+            next((0, http_errors_1.default)(401, "Email already exists!"));
+        //
         const newUser = new schema_1.default(req.body);
-        console.log("User =>", newUser);
         const { accessToken, refreshToken } = yield (0, token_1.generateJWT)(newUser);
         newUser.refreshToken = refreshToken;
         yield newUser.save();

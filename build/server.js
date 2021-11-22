@@ -8,13 +8,23 @@ const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const errorHandlers_1 = require("./errorHandler/errorHandlers");
 const register_1 = __importDefault(require("./routes/auth/register/register"));
+const login_1 = __importDefault(require("./routes/auth/login/login"));
+const user_1 = __importDefault(require("./routes/users/user"));
+const passport_1 = __importDefault(require("passport"));
+const loginGoogle_1 = __importDefault(require("./routes/auth/login/loginGoogle"));
+const post_1 = __importDefault(require("./routes/posts/post"));
 //
 exports.app = (0, express_1.default)();
+passport_1.default.use(loginGoogle_1.default);
 //
 exports.app.use((0, cors_1.default)());
 exports.app.use(express_1.default.json());
+exports.app.use(passport_1.default.initialize());
 //
 exports.app.use("/register", register_1.default);
+exports.app.use("/login", login_1.default);
+exports.app.use("/user", user_1.default);
+exports.app.use("/post", post_1.default);
 //
 exports.app.use(errorHandlers_1.generalErrHandl);
 exports.app.use(errorHandlers_1.catchAllHandler);

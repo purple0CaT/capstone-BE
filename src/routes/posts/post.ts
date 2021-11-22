@@ -39,7 +39,46 @@ postRoute.post(
       await newPost.save();
       res.send(newPost);
     } catch (error) {
-      next(createHttpError(500));
+      next(createHttpError(500, error as any));
+    }
+  }
+);
+
+postRoute.put("/:postId", async (req, res, next) => {
+  try {
+    const post = await PostSchema.findByIdAndUpdate(
+      req.params.postId,
+      req.body,
+      { new: true }
+    );
+    res.send(post);
+  } catch (error) {
+    next(createHttpError(500, error as any));
+  }
+});
+postRoute.delete("/:postId", async (req, res, next) => {
+  try {
+    const post = await PostSchema.findByIdAndDelete(req.params.postId);
+    res.status(201).send({ message: "Deleted!" });
+  } catch (error) {
+    next(createHttpError(500, error as Error));
+  }
+});
+postRoute.put(
+  "/media/:postId",
+  authJWT,
+  multer({ storage: storage }).single("media"),
+  async (req: any, res, next) => {
+    try {
+      const post = await PostSchema.findByIdAndUpdate({
+        ...req.body,
+        media: req.file.path,
+        author: req.user._id,
+      });
+      await post.save();
+      res.send(post);
+    } catch (error) {
+      next(createHttpError(500, error as any));
     }
   }
 );
