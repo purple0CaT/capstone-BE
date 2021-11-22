@@ -39,6 +39,15 @@ postRoute.get("/", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, v
         next((0, http_errors_1.default)(500));
     }
 }));
+postRoute.get("/:postId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const post = yield schema_1.default.findById(req.params.postId).populate("author");
+        res.send(post);
+    }
+    catch (error) {
+        next((0, http_errors_1.default)(500));
+    }
+}));
 //
 postRoute.post("/", tokenCheck_1.authJWT, (0, multer_1.default)({ storage: storage }).single("media"), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -52,7 +61,7 @@ postRoute.post("/", tokenCheck_1.authJWT, (0, multer_1.default)({ storage: stora
 }));
 postRoute.put("/:postId", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const post = yield schema_1.default.findByIdAndUpdate(req.params.postId, req.body, { new: true });
+        const post = yield schema_1.default.findByIdAndUpdate(req.params.postId, req.body, { new: true }).populate("author");
         res.send(post);
     }
     catch (error) {
@@ -71,7 +80,6 @@ postRoute.delete("/:postId", (req, res, next) => __awaiter(void 0, void 0, void 
 postRoute.put("/media/:postId", tokenCheck_1.authJWT, (0, multer_1.default)({ storage: storage }).single("media"), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const post = yield schema_1.default.findByIdAndUpdate(Object.assign(Object.assign({}, req.body), { media: req.file.path, author: req.user._id }));
-        yield post.save();
         res.send(post);
     }
     catch (error) {

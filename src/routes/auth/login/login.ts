@@ -17,10 +17,10 @@ loginRoute.post("/", async (req, res, next) => {
       await user.save();
       res.send({ user, tokens: { accessToken, refreshToken } });
     } else {
-      next(createHttpError(400, "Bad request"));
+      next(createHttpError(401));
     }
   } catch (error) {
-    next(createHttpError(500));
+    next(createHttpError(400));
   }
 });
 //

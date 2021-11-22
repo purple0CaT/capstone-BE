@@ -85,7 +85,6 @@ postRoute.put(
         media: req.file.path,
         author: req.user._id,
       });
-      await post.save();
       res.send(post);
     } catch (error) {
       next(createHttpError(500, error as any));

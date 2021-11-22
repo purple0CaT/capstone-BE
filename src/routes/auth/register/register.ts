@@ -14,7 +14,9 @@ registerRoute.post("/", async (req, res, next) => {
     const { accessToken, refreshToken } = await generateJWT(newUser);
     newUser.refreshToken = refreshToken;
     await newUser.save();
-    res.send({ user: newUser, tokens: { accessToken, refreshToken } });
+    res
+      .status(201)
+      .send({ user: newUser, tokens: { accessToken, refreshToken } });
   } catch (error) {
     next(createHttpError(400, "Fill all fields"));
   }

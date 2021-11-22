@@ -63,7 +63,7 @@ userRoute.put("/", authJWT, async (req: any, res, next) => {
 userRoute.delete("/", authJWT, async (req: any, res, next) => {
   try {
     const user = await UserSchema.findByIdAndDelete(req.user._id);
-    res.status(201).send({ message: "Deletet!" });
+    res.status(204);
   } catch (error) {
     next(createHttpError(500, error as any));
   }

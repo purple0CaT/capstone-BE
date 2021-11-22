@@ -9,7 +9,7 @@ const UserSchema = new Schema<UserType, UserSchemaType>({
   lastname: { type: String, required: true },
   password: {
     type: String,
-    required: function (this: any) {
+    required: function (this: UserType) {
       return !Boolean(this.fbId || this.googleId);
     },
   },
@@ -22,13 +22,13 @@ const UserSchema = new Schema<UserType, UserSchemaType>({
   },
   googleId: {
     type: String,
-    required: function (this: any) {
+    required: function (this: UserType) {
       return !Boolean(this.fbId || this.password);
     },
   },
   fbId: {
     type: String,
-    required: function (this: any) {
+    required: function (this: UserType) {
       return !Boolean(this.googleId || this.password);
     },
   },
@@ -36,6 +36,7 @@ const UserSchema = new Schema<UserType, UserSchemaType>({
   cart: { type: String, required: false },
   creator: { type: String, required: false },
   booking: { type: String },
+  folowers: { type: Schema.Types.ObjectId, ref: "Folower" },
   shop: { type: Schema.Types.ObjectId, ref: "Shop" },
   refreshToken: { type: String, required: false },
 });
@@ -44,7 +45,7 @@ UserSchema.pre("save", async function () {
   const user = this;
   const pass = user.password;
   if (user.isModified("password")) {
-    user.password = await bcrypt.hash(pass as any, 10);
+    user.password = await bcrypt.hash(pass as string, 10);
   }
 });
 //
