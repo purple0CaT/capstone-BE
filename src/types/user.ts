@@ -18,7 +18,7 @@ export interface UserType {
   shop?: string;
   creator?: string;
   booking?: string;
-  folowers?: string;
+  followers?: string;
 }
 export interface UserSchemaType extends Model<UserType> {
   CheckCredentials(email: string, password: string): any;

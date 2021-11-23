@@ -18,6 +18,7 @@ export const authJWT = async (req: any, res: any, next: NextFunction) => {
         next(createHttpError(404, "User not found!"));
       }
     } catch (error) {
+      // console.log(error)
       next(createHttpError(500));
     }
   }

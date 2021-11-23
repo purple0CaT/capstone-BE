@@ -36,7 +36,7 @@ const UserSchema = new Schema<UserType, UserSchemaType>({
   cart: { type: String, required: false },
   creator: { type: String, required: false },
   booking: { type: String },
-  folowers: { type: Schema.Types.ObjectId, ref: "Folower" },
+  followers: { type: Schema.Types.ObjectId, ref: "Follower" },
   shop: { type: Schema.Types.ObjectId, ref: "Shop" },
   refreshToken: { type: String, required: false },
 });

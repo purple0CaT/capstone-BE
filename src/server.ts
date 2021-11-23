@@ -7,6 +7,7 @@ import userRoute from "./routes/users/user";
 import passport from "passport";
 import googleStrategy from "./routes/auth/login/loginGoogle";
 import postRoute from "./routes/posts/post";
+import followRoute from "./routes/followers/followers";
 //
 export const app = express();
 passport.use(googleStrategy);
@@ -19,6 +20,7 @@ app.use("/register", registerRoute);
 app.use("/login", loginRoute);
 app.use("/user", userRoute);
 app.use("/post", postRoute);
+app.use("/follow", followRoute);
 //
 app.use(generalErrHandl as any);
 app.use(catchAllHandler as any);
