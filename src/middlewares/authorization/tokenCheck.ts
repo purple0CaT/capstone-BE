@@ -19,7 +19,7 @@ export const authJWT = async (req: any, res: any, next: NextFunction) => {
       }
     } catch (error) {
       // console.log(error)
-      next(createHttpError(500));
+      next(createHttpError(500, error as any));
     }
   }
 };

@@ -13,6 +13,7 @@ const UserSchema = new Schema<UserType, UserSchemaType>({
       return !Boolean(this.fbId || this.googleId);
     },
   },
+  refreshToken: { type: String, required: false },
   email: { type: String, required: true },
   avatar: {
     type: String,
@@ -38,7 +39,6 @@ const UserSchema = new Schema<UserType, UserSchemaType>({
   booking: { type: String },
   followers: { type: Schema.Types.ObjectId, ref: "Follower" },
   shop: { type: Schema.Types.ObjectId, ref: "Shop" },
-  refreshToken: { type: String, required: false },
 });
 //
 UserSchema.pre("save", async function () {
@@ -54,8 +54,10 @@ UserSchema.methods.toJSON = function () {
   const userObj = user.toObject();
 
   delete userObj.password;
-  delete userObj.__v;
   delete userObj.refreshToken;
+  delete userObj.__v;
+  // console.log(userObj);
+
   return userObj;
 };
 //
