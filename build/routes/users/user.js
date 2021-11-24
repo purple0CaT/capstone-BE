@@ -18,6 +18,7 @@ const tokenCheck_1 = require("../../middlewares/authorization/tokenCheck");
 const multer_storage_cloudinary_1 = require("multer-storage-cloudinary");
 const cloudinary_1 = require("cloudinary");
 const schema_1 = __importDefault(require("./schema"));
+const schema_2 = __importDefault(require("../followers/schema"));
 const multer_1 = __importDefault(require("multer"));
 const userRoute = express_1.default.Router();
 const storage = new multer_storage_cloudinary_1.CloudinaryStorage({
@@ -29,7 +30,9 @@ const storage = new multer_storage_cloudinary_1.CloudinaryStorage({
     }),
 });
 //
-userRoute.get("/", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+userRoute
+    .route("/")
+    .get(tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const allUsers = yield schema_1.default.find();
         res.send(allUsers);
@@ -37,12 +40,38 @@ userRoute.get("/", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, v
     catch (error) {
         next((0, http_errors_1.default)(500));
     }
+}))
+    .put(tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user = yield schema_1.default.findByIdAndUpdate(req.user._id, req.body, {
+            new: true,
+        });
+        res.send(user);
+    }
+    catch (error) {
+        next((0, http_errors_1.default)(500, error));
+    }
+}))
+    .delete(tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user = yield schema_1.default.findByIdAndDelete(req.user._id);
+        res.status(204);
+    }
+    catch (error) {
+        next((0, http_errors_1.default)(500, error));
+    }
 }));
 userRoute.get("/me", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        res.send(req.user);
+        // console.log(1)
+        const followers = yield schema_2.default.findById(req.user.followers).populate([
+            "followers",
+            "youFollow",
+        ]);
+        res.send({ user: req.user, followers });
     }
     catch (error) {
+        console.log(error);
         next((0, http_errors_1.default)(500));
     }
 }));
@@ -57,24 +86,17 @@ userRoute.put("/avatar", tokenCheck_1.authJWT, (0, multer_1.default)({ storage: 
         next((0, http_errors_1.default)(500, error));
     }
 }));
-userRoute.put("/", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+userRoute.get("/:userId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = yield schema_1.default.findByIdAndUpdate(req.user._id, req.body, {
-            new: true,
-        });
-        res.send(user);
+        const user = yield schema_1.default.findById(req.params.userId);
+        const followers = yield schema_2.default.findById(user.followers).populate([
+            "followers",
+            "youFollow",
+        ]);
+        res.send({ user, followers });
     }
     catch (error) {
-        next((0, http_errors_1.default)(500, error));
-    }
-}));
-userRoute.delete("/", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const user = yield schema_1.default.findByIdAndDelete(req.user._id);
-        res.status(201).send({ message: "Deletet!" });
-    }
-    catch (error) {
-        next((0, http_errors_1.default)(500, error));
+        next((0, http_errors_1.default)(500));
     }
 }));
 exports.default = userRoute;

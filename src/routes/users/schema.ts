@@ -52,12 +52,8 @@ UserSchema.pre("save", async function () {
 UserSchema.methods.toJSON = function () {
   const user = this;
   const userObj = user.toObject();
-
   delete userObj.password;
   delete userObj.refreshToken;
-  delete userObj.__v;
-  // console.log(userObj);
-
   return userObj;
 };
 //

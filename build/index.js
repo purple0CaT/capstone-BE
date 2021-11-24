@@ -18,5 +18,6 @@ if (!process.env.MONGO_URL) {
 mongoose_1.default.connect(process.env.MONGO_URL).then(() => {
     console.log("Connected to Mongo🍁");
     console.table((0, express_list_endpoints_1.default)(server_1.app));
+    console.log("Server on 🚀", port);
     io_1.httpServer.listen(port);
 });

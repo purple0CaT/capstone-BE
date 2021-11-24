@@ -30,11 +30,11 @@ loginRoute.post("/", (req, res, next) => __awaiter(void 0, void 0, void 0, funct
             res.send({ user, tokens: { accessToken, refreshToken } });
         }
         else {
-            next((0, http_errors_1.default)(400, "Bad request"));
+            next((0, http_errors_1.default)(401));
         }
     }
     catch (error) {
-        next((0, http_errors_1.default)(500));
+        next((0, http_errors_1.default)(400));
     }
 }));
 //

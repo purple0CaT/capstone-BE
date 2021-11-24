@@ -13,6 +13,8 @@ const user_1 = __importDefault(require("./routes/users/user"));
 const passport_1 = __importDefault(require("passport"));
 const loginGoogle_1 = __importDefault(require("./routes/auth/login/loginGoogle"));
 const post_1 = __importDefault(require("./routes/posts/post"));
+const followers_1 = __importDefault(require("./routes/followers/followers"));
+const chat_1 = __importDefault(require("./routes/chats/chat"));
 //
 exports.app = (0, express_1.default)();
 passport_1.default.use(loginGoogle_1.default);
@@ -25,6 +27,8 @@ exports.app.use("/register", register_1.default);
 exports.app.use("/login", login_1.default);
 exports.app.use("/user", user_1.default);
 exports.app.use("/post", post_1.default);
+exports.app.use("/follow", followers_1.default);
+exports.app.use("/chat", chat_1.default);
 //
 exports.app.use(errorHandlers_1.generalErrHandl);
 exports.app.use(errorHandlers_1.catchAllHandler);

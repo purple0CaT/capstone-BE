@@ -27,6 +27,7 @@ const authJWT = (req, res, next) => __awaiter(void 0, void 0, void 0, function* 
             const user = yield schema_1.default.findById(decodeToken._id);
             if (user) {
                 req.user = user;
+                console.log(user);
                 next();
             }
             else {
@@ -34,7 +35,8 @@ const authJWT = (req, res, next) => __awaiter(void 0, void 0, void 0, function* 
             }
         }
         catch (error) {
-            next((0, http_errors_1.default)(500));
+            // console.log(error)
+            next((0, http_errors_1.default)(500, error));
         }
     }
 });

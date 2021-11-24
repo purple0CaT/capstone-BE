@@ -21,11 +21,14 @@ io.on("connection", async (socket: any) => {
   // ======================
   socket.on("sendmessage", async ({ message, room }: any) => {
     const newMessage = new MessageSchema({
-      sender: socket.user,
+      sender: {
+        _id: socket.user!._id,
+        firstname: socket.user!.firstname,
+        lastname: socket.user!.lastname,
+        avatar: socket.user!.avatar,
+      },
       message: message,
-      // content: message,
     });
-
     const chatHistory = await ChatSchema.findByIdAndUpdate(
       room,
       {
@@ -37,10 +40,8 @@ io.on("connection", async (socket: any) => {
       "members._id": socket.user._id,
     });
     io.in(room).emit("message", { chatHistory, allChats });
-    // socket.to(room).emit("ping", true);
   });
-
-  //////////////////////////////////////////////////
+  //========
   socket.on("disconnect", async () => {
     // console.log("disconnected socket " + socket.id);
     const user: any = await UserSchema.findById(socket.user._id);

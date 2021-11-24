@@ -8,9 +8,8 @@ export const MessageSchema = new Schema(
   },
   { timestamps: true }
 );
-
 const ChatSchema = new Schema({
-  name: { type: String, required: false, default: "Chat" },
+  name: { type: String, required: false, default: "Some chat" },
   image: { type: String },
   members: [{ type: Object }],
   history: [{ type: MessageSchema, required: false }],
