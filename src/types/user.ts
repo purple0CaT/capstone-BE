@@ -19,7 +19,7 @@ export interface UserType {
   followers?: string;
   shopping: {
     cart?: Object;
-    orders?: Object;
+    orders?: Object | any;
     pendingOrders?: Object;
   };
 }

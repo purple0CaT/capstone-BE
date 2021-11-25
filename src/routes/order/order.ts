@@ -3,6 +3,8 @@ import createHttpError from "http-errors";
 import { authJWT } from "../../middlewares/authorization/tokenCheck";
 import { creatorAuth } from "../../middlewares/creator/creator";
 import OrderSchema from "./schema";
+import UserSchema from "../users/schema";
+import CreatorSchema from "../creator/schema";
 //
 const orderRoute = express.Router();
 //
@@ -14,4 +16,27 @@ orderRoute.get("/", authJWT, creatorAuth, async (req: any, res, next) => {
     next(createHttpError(500, error as Error));
   }
 });
-export default orderRoute
+orderRoute.post("/createOrder", authJWT, async (req: any, res, next) => {
+  try {
+    const newOrder = new OrderSchema({ ...req.body, customerId: req.user._id });
+    await newOrder.save();
+    const myUser = await UserSchema.findByIdAndUpdate(
+      req.user._id,
+      {
+        $push: { "shopping.orders": newOrder },
+      },
+      { new: true }
+    );
+    //
+    const sellerUser = await UserSchema.findById(req.body.sellerId);
+    const sellerCreator = await CreatorSchema.findByIdAndUpdate(
+      sellerUser!.creator,
+      { $push: { "shop.orders": newOrder } },
+      { new: true }
+    ); //
+    res.status(201).send(myUser);
+  } catch (error) {
+    next(createHttpError(500, error as Error));
+  }
+});
+export default orderRoute;

@@ -5,10 +5,11 @@ const { Schema, model } = mongoose;
 
 const CreatorSchema = new Schema({
   creatorType: { type: String, required: true },
-  shop: { type: Schema.Types.ObjectId, ref: "Shop" },
-  //   statistic: { type: String, ref: "Shop" },
-  booking: [{ type: Date, default: [] }],
-  pendingBooking: [{ type: Date, default: [] }],
+  shop: {
+    items: [{ type: Object, required: false, default: [] }],
+    orders: [{ type: Object, required: false, default: [] }],
+  },
+  booking: [{ type: Object, default: [] }],
 });
 
 export default model<CreatorType>("Creator", CreatorSchema);

@@ -39,9 +39,10 @@ creatorRoute.post("/beCreator", authJWT, async (req: any, res, next) => {
         quantity: 10,
         seller: req.user._id,
       });
-      const shop = new ShopSchema({ items: [newItem1, newItem2] });
-      await shop.save();
-      const creator = new CreatorSchema({ ...req.body, shop: shop._id });
+      const creator = new CreatorSchema({
+        ...req.body,
+        shop: { items: [newItem1, newItem2] },
+      });
       await creator.save();
       userInfo!.creator = creator._id;
       await userInfo!.save();
@@ -64,7 +65,6 @@ creatorRoute.delete(
         req.user.creator
       );
       if (creator) {
-        const shopDel = await ShopSchema.findOneAndDelete(creator.shop);
         const creatorDel = await CreatorSchema.findOneAndDelete(
           req.user.creator
         );
