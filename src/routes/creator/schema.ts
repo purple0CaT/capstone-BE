@@ -7,7 +7,7 @@ const CreatorSchema = new Schema({
   creatorType: { type: String, required: true },
   shop: {
     items: [{ type: Object, required: false, default: [] }],
-    orders: [{ type: Object, required: false, default: [] }],
+    orders: [{ type: Schema.Types.ObjectId, ref: "Order", default: [] }],
   },
   booking: [{ type: Object, default: [] }],
 });

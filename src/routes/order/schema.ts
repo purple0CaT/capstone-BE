@@ -8,7 +8,8 @@ const OrderSchema = new Schema(
     customerId: { type: String, required: true },
     sellerId: { type: String, required: true },
     paid: { type: Boolean, default: false },
-    deliveryCode: { type: String, default: null },
+    deliveryCodeTracking: { type: String, default: null },
+    deliveryAddress: { type: String, required: true },
     completed: { true: String },
   },
   { timestamps: true }

@@ -17,10 +17,10 @@ const Items = new Schema({
 });
 export const ItemsSchema = model("Items", Items);
 //=== SHOP
-const Shop = new Schema({
-  items: [{ type: Object, required: false }],
-  orders: [{ type: Object, required: false }],
-  deliverOrder: [{ type: Object, required: false }],
-  pendingOrder: [{ type: Object, required: false }],
-});
-export const ShopSchema = model("Shop", Shop);
+// const Shop = new Schema({
+//   items: [{ type: Object, required: false }],
+//   orders: [{ type: Object, required: false }],
+//   deliverOrder: [{ type: Object, required: false }],
+//   pendingOrder: [{ type: Object, required: false }],
+// });
+// export const ShopSchema = model("Shop", Shop);

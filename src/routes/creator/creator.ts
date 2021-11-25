@@ -2,18 +2,20 @@ import express from "express";
 import createHttpError from "http-errors";
 import { authJWT } from "../../middlewares/authorization/tokenCheck";
 import { creatorAuth } from "../../middlewares/creator/creator";
-import UserSchema from "../users/schema";
-import { ItemsSchema, ShopSchema } from "../shop/schema";
-import CreatorSchema from "./schema";
 import { CreatorType } from "../../types/creator";
+import { ItemsSchema } from "../shop/schema";
+import UserSchema from "../users/schema";
+import CreatorSchema from "./schema";
 //
 const creatorRoute = express.Router();
 //
 creatorRoute.get("/me", authJWT, creatorAuth, async (req: any, res, next) => {
   try {
-    const userInfo = await UserSchema.findById(req.user._id).populate(
-      "creator"
-    );
+    const userInfo = await UserSchema.findById(req.user._id).populate([
+      "creator",
+      "creator.shop.orders",
+      "shopping.cart",
+    ]);
     res.send(userInfo);
   } catch (error) {
     console.log(500);

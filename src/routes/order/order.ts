@@ -2,9 +2,9 @@ import express from "express";
 import createHttpError from "http-errors";
 import { authJWT } from "../../middlewares/authorization/tokenCheck";
 import { creatorAuth } from "../../middlewares/creator/creator";
-import OrderSchema from "./schema";
-import UserSchema from "../users/schema";
 import CreatorSchema from "../creator/schema";
+import UserSchema from "../users/schema";
+import OrderSchema from "./schema";
 //
 const orderRoute = express.Router();
 //
@@ -23,7 +23,7 @@ orderRoute.post("/createOrder", authJWT, async (req: any, res, next) => {
     const myUser = await UserSchema.findByIdAndUpdate(
       req.user._id,
       {
-        $push: { "shopping.orders": newOrder },
+        $push: { "shopping.orders": newOrder._id },
       },
       { new: true }
     );

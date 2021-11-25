@@ -10,7 +10,9 @@ export const authJWT = async (req: any, res: any, next: NextFunction) => {
     try {
       const token = req.headers.authorization.replace("Bearer ", "");
       const decodeToken: any = await verifyJWT(token);
-      const user = await UserSchema.findById(decodeToken._id);
+      const user = await UserSchema.findById(decodeToken._id).populate({
+        path: "shopping.orders",
+      });
       if (user) {
         req.user = user;
         // console.log(user);

@@ -35,7 +35,7 @@ const UserSchema = new Schema({
   },
   shopping: {
     cart: [{ type: Object, required: false }],
-    orders: [{ type: Object }],
+    orders: [{ type: Schema.Types.ObjectId, ref: "Order", required: false }],
     pendingOrders: [{ type: Object }],
   },
   creator: {

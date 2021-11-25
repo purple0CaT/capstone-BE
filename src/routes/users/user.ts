@@ -47,7 +47,6 @@ userRoute
   });
 userRoute.get("/me", authJWT, async (req: any, res, next) => {
   try {
-    // console.log(1)
     const followers = await FollowSchema.findById(req.user.followers).populate([
       "followers",
       "youFollow",
