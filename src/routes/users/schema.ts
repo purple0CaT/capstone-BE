@@ -4,7 +4,7 @@ import { UserSchemaType, UserType } from "../../types/user";
 //
 const { Schema, model } = mongoose;
 //
-const UserSchema = new Schema<UserType, UserSchemaType>({
+const UserSchema = new Schema({
   firstname: { type: String, required: true },
   lastname: { type: String, required: true },
   password: {
@@ -33,12 +33,19 @@ const UserSchema = new Schema<UserType, UserSchemaType>({
       return !Boolean(this.googleId || this.password);
     },
   },
+  shopping: {
+    cart: [{ type: Object, required: false }],
+    orders: [{ type: Object }],
+    pendingOrders: [{ type: Object }],
+  },
+  creator: {
+    type: Schema.Types.ObjectId,
+    ref: "Creator",
+    default: null,
+    required: false,
+  },
   socket: { type: String, required: false },
-  cart: { type: String, required: false },
-  creator: { type: String, required: false },
-  booking: { type: String },
   followers: { type: Schema.Types.ObjectId, ref: "Follower" },
-  shop: { type: Schema.Types.ObjectId, ref: "Shop" },
 });
 //
 UserSchema.pre("save", async function () {

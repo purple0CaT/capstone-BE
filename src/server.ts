@@ -9,6 +9,9 @@ import googleStrategy from "./routes/auth/login/loginGoogle";
 import postRoute from "./routes/posts/post";
 import followRoute from "./routes/followers/followers";
 import chatRoute from "./routes/chats/chat";
+import creatorRoute from "./routes/creator/creator";
+import shopRoute from "./routes/shop/shop";
+import orderRoute from "./routes/order/order";
 //
 export const app = express();
 passport.use(googleStrategy);
@@ -23,6 +26,9 @@ app.use("/user", userRoute);
 app.use("/post", postRoute);
 app.use("/follow", followRoute);
 app.use("/chat", chatRoute);
+app.use("/creator", creatorRoute);
+app.use("/shop", shopRoute);
+app.use("/order", orderRoute);
 //
 app.use(generalErrHandl as any);
 app.use(catchAllHandler as any);

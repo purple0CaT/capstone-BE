@@ -13,7 +13,7 @@ export const authJWT = async (req: any, res: any, next: NextFunction) => {
       const user = await UserSchema.findById(decodeToken._id);
       if (user) {
         req.user = user;
-        console.log(user);
+        // console.log(user);
         next();
       } else {
         next(createHttpError(404, "User not found!"));

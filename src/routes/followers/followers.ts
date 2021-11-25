@@ -7,7 +7,7 @@ import createHttpError from "http-errors";
 const followRoute = express.Router();
 // Follow smbdy
 followRoute.post("/:userId", authJWT, async (req: any, res, next) => {
-  console.log(req.user);
+  // console.log(req.user);
   try {
     //
     const myUser = await UserSchema.findById(req.user._id.toString());

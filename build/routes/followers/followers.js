@@ -21,7 +21,7 @@ const http_errors_1 = __importDefault(require("http-errors"));
 const followRoute = express_1.default.Router();
 // Follow smbdy
 followRoute.post("/:userId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(req.user);
+    // console.log(req.user);
     try {
         //
         const myUser = yield schema_1.default.findById(req.user._id.toString());

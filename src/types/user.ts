@@ -14,11 +14,14 @@ export interface UserType {
   fbId?: string;
   refreshToken?: any;
   socket?: string;
-  cart?: string;
-  shop?: string;
-  creator?: string;
+  creator?: string | null;
   booking?: string;
   followers?: string;
+  shopping: {
+    cart?: Object;
+    orders?: Object;
+    pendingOrders?: Object;
+  };
 }
 export interface UserSchemaType extends Model<UserType> {
   CheckCredentials(email: string, password: string): any;
