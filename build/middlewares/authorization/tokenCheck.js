@@ -24,10 +24,12 @@ const authJWT = (req, res, next) => __awaiter(void 0, void 0, void 0, function* 
         try {
             const token = req.headers.authorization.replace("Bearer ", "");
             const decodeToken = yield (0, token_1.verifyJWT)(token);
-            const user = yield schema_1.default.findById(decodeToken._id);
+            const user = yield schema_1.default.findById(decodeToken._id).populate({
+                path: "shopping.orders",
+            });
             if (user) {
                 req.user = user;
-                console.log(user);
+                // console.log(user);
                 next();
             }
             else {

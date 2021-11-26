@@ -63,7 +63,6 @@ userRoute
 }));
 userRoute.get("/me", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        // console.log(1)
         const followers = yield schema_2.default.findById(req.user.followers).populate([
             "followers",
             "youFollow",

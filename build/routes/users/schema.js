@@ -27,7 +27,7 @@ const UserSchema = new Schema({
         },
     },
     refreshToken: { type: String, required: false },
-    email: { type: String, required: true },
+    email: { type: String, required: true, lowercase: true },
     avatar: {
         type: String,
         required: false,
@@ -45,12 +45,19 @@ const UserSchema = new Schema({
             return !Boolean(this.googleId || this.password);
         },
     },
+    shopping: {
+        cart: [{ type: Object, required: false }],
+        orders: [{ type: Schema.Types.ObjectId, ref: "Order", required: false }],
+        pendingOrders: [{ type: Object }],
+    },
+    creator: {
+        type: Schema.Types.ObjectId,
+        ref: "Creator",
+        default: null,
+        required: false,
+    },
     socket: { type: String, required: false },
-    cart: { type: String, required: false },
-    creator: { type: String, required: false },
-    booking: { type: String },
     followers: { type: Schema.Types.ObjectId, ref: "Follower" },
-    shop: { type: Schema.Types.ObjectId, ref: "Shop" },
 });
 //
 UserSchema.pre("save", function () {

@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request } from "express";
 import createHttpError from "http-errors";
 import { authJWT } from "../../middlewares/authorization/tokenCheck";
 import { creatorAuth } from "../../middlewares/creator/creator";
@@ -30,9 +30,26 @@ orderRoute.get("/", authJWT, creatorAuth, async (req: any, res, next) => {
     next(createHttpError(500, error as Error));
   }
 });
+orderRoute.put(
+  "/delivery/:orderId",
+  authJWT,
+  creatorAuth,
+  async (req: Request, res, next) => {
+    try {
+      const order = await OrderSchema.findByIdAndUpdate(
+        req.params.orderId,
+        { deliveryCodeTracking: req.body.deliveryCodeTracking },
+        { new: true }
+      );
+      res.send(order);
+    } catch (error) {
+      next(createHttpError(500, error as Error));
+    }
+  }
+);
 orderRoute.post("/createOrder", authJWT, async (req: any, res, next) => {
   try {
-    //   Create new order and update avaible items in store
+    //   Create new order
     const newOrder = new OrderSchema({ ...req.body, customerId: req.user._id });
     await newOrder.save();
     // Update items quantity in store
@@ -42,7 +59,7 @@ orderRoute.post("/createOrder", authJWT, async (req: any, res, next) => {
           $inc: { quantity: -I.qty },
         })
     );
-    //
+    // user update
     const myUser = await UserSchema.findByIdAndUpdate(
       req.user._id,
       {

@@ -12,25 +12,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
+exports.creatorAuth = void 0;
 const http_errors_1 = __importDefault(require("http-errors"));
-const tokenCheck_1 = require("../../middlewares/authorization/tokenCheck");
-const creator_1 = require("../../middlewares/creator/creator");
-const schema_1 = __importDefault(require("../creator/schema"));
-// import { ShopSchema } from "./schema";
-//
-const shopRoute = express_1.default.Router();
-//
-shopRoute.get("/", tokenCheck_1.authJWT, creator_1.creatorAuth, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+const creatorAuth = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const creator = yield schema_1.default.findById(req.user.creator);
-        if (creator) {
-            // const myShop = await ShopSchema.findById(creator.shop);
-            res.send("Ok");
+        if (req.user.creator) {
+            next();
+        }
+        else {
+            next((0, http_errors_1.default)(404, "You are not a creator!"));
         }
     }
     catch (error) {
         next((0, http_errors_1.default)(500, error));
     }
-}));
-exports.default = shopRoute;
+});
+exports.creatorAuth = creatorAuth;
