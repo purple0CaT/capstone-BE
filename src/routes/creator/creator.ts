@@ -13,10 +13,12 @@ creatorRoute.get("/me", authJWT, creatorAuth, async (req: any, res, next) => {
   try {
     const userInfo = await UserSchema.findById(req.user._id).populate([
       "creator",
-      "creator.shop.orders",
       "shopping.cart",
     ]);
-    res.send(userInfo);
+    const creatorInfo = await CreatorSchema.findById(req.user.creator).populate(
+      ["shop.items", "shop.orders"]
+    );
+    res.send({ creator: creatorInfo });
   } catch (error) {
     console.log(500);
     next(createHttpError(500, error as any));
@@ -25,32 +27,35 @@ creatorRoute.get("/me", authJWT, creatorAuth, async (req: any, res, next) => {
 creatorRoute.post("/beCreator", authJWT, async (req: any, res, next) => {
   try {
     const userInfo = await UserSchema.findById(req.user._id);
-    if (!userInfo!.creator) {
+    if (userInfo!.creator) {
+      next(createHttpError(400, " You are already a creator!"));
+    } else {
       const newItem1 = new ItemsSchema({
         title: "Landscape printed picture",
         price: 10,
         descrition:
-          "Landscape printed picture of selected post with sizes: 16:9",
+          "Landscape printed picture of selected post with ratio: 16:9",
         quantity: 10,
         seller: req.user._id,
       });
       const newItem2 = new ItemsSchema({
         title: "Portret printed picture",
         price: 10,
-        descrition: "Portret printed picture of selected post with sizes: 3:4",
+        descrition: "Portret printed picture of selected post with ratio: 3:4",
         quantity: 10,
         seller: req.user._id,
       });
+      await newItem1.save();
+      await newItem2.save();
+      //
       const creator = new CreatorSchema({
         ...req.body,
-        shop: { items: [newItem1, newItem2] },
+        shop: { items: [newItem1._id, newItem2._id] },
       });
       await creator.save();
       userInfo!.creator = creator._id;
       await userInfo!.save();
       res.send(userInfo);
-    } else {
-      next(createHttpError(400, " You are already a creator!"));
     }
   } catch (error) {
     console.log(500);
@@ -67,9 +72,12 @@ creatorRoute.delete(
         req.user.creator
       );
       if (creator) {
-        const creatorDel = await CreatorSchema.findOneAndDelete(
-          req.user.creator
+        creator.shop.items.map(
+          async (I: any) => await ItemsSchema.findByIdAndDelete(I._id)
         );
+        //
+        await CreatorSchema.findOneAndDelete(req.user.creator);
+        //
         const user = await UserSchema.findByIdAndUpdate(
           req.user._id,
           {

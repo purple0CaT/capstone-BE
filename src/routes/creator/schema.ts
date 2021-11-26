@@ -6,7 +6,14 @@ const { Schema, model } = mongoose;
 const CreatorSchema = new Schema({
   creatorType: { type: String, required: true },
   shop: {
-    items: [{ type: Object, required: false, default: [] }],
+    items: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Item",
+        required: false,
+        default: [],
+      },
+    ],
     orders: [{ type: Schema.Types.ObjectId, ref: "Order", default: [] }],
   },
   booking: [{ type: Object, default: [] }],

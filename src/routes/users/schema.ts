@@ -14,7 +14,7 @@ const UserSchema = new Schema({
     },
   },
   refreshToken: { type: String, required: false },
-  email: { type: String, required: true },
+  email: { type: String, required: true, lowercase: true },
   avatar: {
     type: String,
     required: false,

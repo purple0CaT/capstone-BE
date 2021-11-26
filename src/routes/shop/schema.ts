@@ -15,7 +15,7 @@ const Items = new Schema({
   quantity: { type: Number, required: true },
   seller: { Type: String, required: false },
 });
-export const ItemsSchema = model("Items", Items);
+export const ItemsSchema = model("Item", Items);
 //=== SHOP
 // const Shop = new Schema({
 //   items: [{ type: Object, required: false }],
