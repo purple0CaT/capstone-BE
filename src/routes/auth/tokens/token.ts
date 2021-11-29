@@ -7,6 +7,7 @@ process.env.TS_NODE_DEV && require("dotenv").config();
 export const generateJWT = async (user: UserType) => {
   const accessToken = await createJWT({ _id: user._id });
   const refreshToken = await createRefreshJWT({ _id: user._id });
+  //
   return { accessToken, refreshToken };
 };
 //  GENERATE TOKENS

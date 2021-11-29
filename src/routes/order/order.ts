@@ -9,6 +9,24 @@ import OrderSchema from "./schema";
 //
 const orderRoute = express.Router();
 //
+
+orderRoute.get("/", authJWT, async (req: any, res, next) => {
+  try {
+    const orders = await OrderSchema.find();
+    res.send(orders);
+  } catch (error) {
+    next(createHttpError(500, error as Error));
+  }
+});
+// Only DEFAULT items
+orderRoute.get("/adminOrders", authJWT, async (req: any, res, next) => {
+  try {
+    const orders = await OrderSchema.find({ "items.item.type": "default" });
+    res.send(orders);
+  } catch (error) {
+    next(createHttpError(500, error as Error));
+  }
+});
 orderRoute.get(
   "/:orderId",
   authJWT,
@@ -22,14 +40,6 @@ orderRoute.get(
     }
   }
 );
-orderRoute.get("/", authJWT, creatorAuth, async (req: any, res, next) => {
-  try {
-    const orders = await OrderSchema.find();
-    res.send(orders);
-  } catch (error) {
-    next(createHttpError(500, error as Error));
-  }
-});
 orderRoute.put(
   "/delivery/:orderId",
   authJWT,

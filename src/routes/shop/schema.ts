@@ -14,6 +14,7 @@ const Items = new Schema({
   price: { type: Number, required: true },
   quantity: { type: Number, required: true },
   seller: { Type: String, required: false },
+  type: { type: String, enum: ["default", "user"], default: "default" },
 });
 export const ItemsSchema = model("Item", Items);
 //=== SHOP

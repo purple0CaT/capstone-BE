@@ -1,7 +1,11 @@
+import { ObjectId } from "mongoose";
+
 export interface CreatorType {
   _id: string;
   creatorType: string;
   shop: string;
-  booking: any[];
-  pendingBooking: any[];
+  booking: {
+    appointments: ObjectId[];
+    availability: { start: Date; end: Date }[];
+  };
 }

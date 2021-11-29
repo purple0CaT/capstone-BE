@@ -11,6 +11,7 @@ loginRoute.post("/", async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await UserSchema.CheckCredentials(email, password);
+    // console.log(user)
     if (user) {
       const { accessToken, refreshToken } = await generateJWT(user);
       user.refreshToken = refreshToken;

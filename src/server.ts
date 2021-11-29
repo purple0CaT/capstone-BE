@@ -12,6 +12,7 @@ import chatRoute from "./routes/chats/chat";
 import creatorRoute from "./routes/creator/creator";
 import shopRoute from "./routes/shop/shop";
 import orderRoute from "./routes/order/order";
+import bookingRoute from "./routes/booking/booking";
 //
 export const app = express();
 passport.use(googleStrategy);
@@ -29,6 +30,7 @@ app.use("/chat", chatRoute);
 app.use("/creator", creatorRoute);
 app.use("/shop", shopRoute);
 app.use("/order", orderRoute);
+app.use("/booking", bookingRoute);
 //
 app.use(generalErrHandl as any);
 app.use(catchAllHandler as any);
