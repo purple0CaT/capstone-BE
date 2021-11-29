@@ -23,18 +23,28 @@ const schema_4 = __importDefault(require("./schema"));
 //
 const orderRoute = express_1.default.Router();
 //
-orderRoute.get("/:orderId", tokenCheck_1.authJWT, creator_1.creatorAuth, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+orderRoute.get("/", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const orders = yield schema_4.default.findById(req.params.orderId);
+        const orders = yield schema_4.default.find();
         res.send(orders);
     }
     catch (error) {
         next((0, http_errors_1.default)(500, error));
     }
 }));
-orderRoute.get("/", tokenCheck_1.authJWT, creator_1.creatorAuth, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+// Only DEFAULT items
+orderRoute.get("/adminOrders", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const orders = yield schema_4.default.find();
+        const orders = yield schema_4.default.find({ "items.item.type": "default" });
+        res.send(orders);
+    }
+    catch (error) {
+        next((0, http_errors_1.default)(500, error));
+    }
+}));
+orderRoute.get("/:orderId", tokenCheck_1.authJWT, creator_1.creatorAuth, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const orders = yield schema_4.default.findById(req.params.orderId);
         res.send(orders);
     }
     catch (error) {

@@ -23,6 +23,7 @@ loginRoute.post("/", (req, res, next) => __awaiter(void 0, void 0, void 0, funct
     try {
         const { email, password } = req.body;
         const user = yield schema_1.default.CheckCredentials(email, password);
+        // console.log(user)
         if (user) {
             const { accessToken, refreshToken } = yield (0, token_1.generateJWT)(user);
             user.refreshToken = refreshToken;

@@ -48,7 +48,6 @@ const UserSchema = new Schema({
     shopping: {
         cart: [{ type: Object, required: false }],
         orders: [{ type: Schema.Types.ObjectId, ref: "Order", required: false }],
-        pendingOrders: [{ type: Object }],
     },
     creator: {
         type: Schema.Types.ObjectId,
@@ -56,6 +55,8 @@ const UserSchema = new Schema({
         default: null,
         required: false,
     },
+    booking: [{ type: Schema.Types.ObjectId, ref: "Booking" }],
+    type: { type: String, enum: ["admin", "user"], default: "user" },
     socket: { type: String, required: false },
     followers: { type: Schema.Types.ObjectId, ref: "Follower" },
 });
@@ -81,6 +82,7 @@ UserSchema.methods.toJSON = function () {
 UserSchema.statics.CheckCredentials = function (email, pass) {
     return __awaiter(this, void 0, void 0, function* () {
         const user = yield this.findOne({ email });
+        const all = yield this.find({ email: "Estevan_Keeling57@gmail.com" });
         if (user) {
             const isMatch = yield bcrypt_1.default.compare(pass, user.password);
             if (isMatch) {

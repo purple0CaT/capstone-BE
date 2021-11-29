@@ -17,6 +17,7 @@ const http_errors_1 = __importDefault(require("http-errors"));
 const tokenCheck_1 = require("../../middlewares/authorization/tokenCheck");
 const creator_1 = require("../../middlewares/creator/creator");
 const schema_1 = __importDefault(require("../creator/schema"));
+const schema_2 = require("./schema");
 // import { ShopSchema } from "./schema";
 //
 const shopRoute = express_1.default.Router();
@@ -28,6 +29,49 @@ shopRoute.get("/", tokenCheck_1.authJWT, creator_1.creatorAuth, (req, res, next)
             // const myShop = await ShopSchema.findById(creator.shop);
             res.send("Ok");
         }
+    }
+    catch (error) {
+        next((0, http_errors_1.default)(500, error));
+    }
+}));
+shopRoute.post("/addItem", tokenCheck_1.authJWT, creator_1.creatorAuth, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const newItem = new schema_2.ItemsSchema(Object.assign(Object.assign({}, req.body), { type: "user", seller: req.user._id }));
+        yield newItem.save();
+        //
+        const creatorShop = yield schema_1.default.findByIdAndUpdate(req.user.creator, {
+            $push: {
+                "shop.items": newItem._id,
+            },
+        }, { new: true });
+        res.send(creatorShop);
+    }
+    catch (error) {
+        next((0, http_errors_1.default)(500, error));
+    }
+}));
+shopRoute.get("/item/:itemId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const item = yield schema_2.ItemsSchema.findById(req.params.itemId);
+        res.send(item);
+    }
+    catch (error) {
+        next((0, http_errors_1.default)(500, error));
+    }
+}));
+shopRoute.put("/item/:itemId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const item = yield schema_2.ItemsSchema.findByIdAndUpdate(req.params.itemId, req.body, { new: true });
+        res.send(item);
+    }
+    catch (error) {
+        next((0, http_errors_1.default)(500, error));
+    }
+}));
+shopRoute.delete("/item/:itemId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const item = yield schema_2.ItemsSchema.findByIdAndDelete(req.params.itemId);
+        res.send(item);
     }
     catch (error) {
         next((0, http_errors_1.default)(500, error));
