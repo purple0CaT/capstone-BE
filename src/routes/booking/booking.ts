@@ -5,7 +5,7 @@ import BookingSchema from "./schema";
 import CreatorSchema from "./../creator/schema";
 import { creatorAuth } from "../../middlewares/creator/creator";
 import UserSchema from "../users/schema";
-import { checkFreeDays } from "./utility";
+import { checkAvailability, checkFreeDays, clearAppointments } from "./utility";
 //
 const bookingRoute = express.Router();
 //
@@ -82,13 +82,27 @@ bookingRoute.post(
   creatorAuth,
   async (req: any, res, next) => {
     try {
-      //
-      const creator = await CreatorSchema.findByIdAndUpdate(
-        req.user.creator,
-        { $push: { "booking.availability": req.body } },
-        { new: true }
-      );
-      res.send(creator);
+      const checkAvail = await checkAvailability(req);
+      // clearAppointments(req);
+      if (checkAvail) {
+        const creator = await CreatorSchema.findByIdAndUpdate(
+          req.user.creator,
+          {
+            $push: {
+              "booking.availability": req.body,
+            },
+          },
+          { new: true }
+        );
+        res.send(creator);
+      } else {
+        next(
+          createHttpError(
+            400,
+            "Availability already set for this time, pick another one!"
+          )
+        );
+      }
     } catch (error) {
       next(createHttpError(500, error as Error));
     }
