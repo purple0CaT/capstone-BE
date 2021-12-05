@@ -21,7 +21,18 @@ userRoute
   .route("/")
   .get(authJWT, async (req, res, next) => {
     try {
-      const allUsers = await UserSchema.find();
+      const { search }: any = req.query;
+      let allUsers;
+      if (search.length > 1) {
+        allUsers = await UserSchema.find({
+          $or: [
+            { firstname: { $regex: `${search}`, $options: "i" } },
+            { lastname: { $regex: `${search}`, $options: "i" } },
+          ],
+        });
+      } else {
+        allUsers = await UserSchema.find();
+      }
       res.send(allUsers);
     } catch (error) {
       next(createHttpError(500));
