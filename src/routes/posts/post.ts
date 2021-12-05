@@ -16,7 +16,7 @@ const storage = new CloudinaryStorage({
   },
 });
 //
-postRoute.get("/", authJWT, async (req, res, next) => {
+postRoute.get("/all", authJWT, async (req, res, next) => {
   try {
     const allPosts = await PostSchema.find({});
     console.log("allPosts");
