@@ -19,6 +19,7 @@ const storage = new CloudinaryStorage({
 postRoute.get("/", authJWT, async (req, res, next) => {
   try {
     const allPosts = await PostSchema.find();
+    console.log(allPosts);
     res.send(allPosts);
   } catch (error) {
     next(createHttpError(500));
@@ -26,9 +27,7 @@ postRoute.get("/", authJWT, async (req, res, next) => {
 });
 postRoute.get("/:postId", authJWT, async (req, res, next) => {
   try {
-    const post = await PostSchema.findById(req.params.postId).populate(
-      "author"
-    );
+    const post = await PostSchema.findById(req.params.postId);
     res.send(post);
   } catch (error) {
     next(createHttpError(500));
