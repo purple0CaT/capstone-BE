@@ -30,10 +30,9 @@ const storage = new multer_storage_cloudinary_1.CloudinaryStorage({
     }),
 });
 //
-postRoute.get("/all", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+postRoute.get("/", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const allPosts = yield schema_1.default.find({});
-        console.log("allPosts");
         res.send(allPosts);
     }
     catch (error) {
