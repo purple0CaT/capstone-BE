@@ -30,9 +30,10 @@ const storage = new multer_storage_cloudinary_1.CloudinaryStorage({
     }),
 });
 //
-postRoute.get("/", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+postRoute.get("/all", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const allPosts = yield schema_1.default.find().populate("author");
+        const allPosts = yield schema_1.default.find({});
+        console.log("allPosts");
         res.send(allPosts);
     }
     catch (error) {
@@ -41,7 +42,7 @@ postRoute.get("/", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, v
 }));
 postRoute.get("/:postId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const post = yield schema_1.default.findById(req.params.postId).populate("author");
+        const post = yield schema_1.default.findById(req.params.postId);
         res.send(post);
     }
     catch (error) {
@@ -51,7 +52,12 @@ postRoute.get("/:postId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(vo
 //
 postRoute.post("/", tokenCheck_1.authJWT, (0, multer_1.default)({ storage: storage }).single("media"), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const newPost = new schema_1.default(Object.assign(Object.assign({}, req.body), { media: req.file.path, author: req.user._id }));
+        const newPost = new schema_1.default(Object.assign(Object.assign({}, req.body), { media: req.file.path, author: {
+                _id: req.user._id,
+                firstname: req.user.firstname,
+                lastname: req.user.lastname,
+                avatar: req.user.avatar,
+            } }));
         yield newPost.save();
         res.send(newPost);
     }

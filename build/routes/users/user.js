@@ -34,7 +34,19 @@ userRoute
     .route("/")
     .get(tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const allUsers = yield schema_1.default.find();
+        const { search } = req.query;
+        let allUsers;
+        if (search.length > 1) {
+            allUsers = yield schema_1.default.find({
+                $or: [
+                    { firstname: { $regex: `${search}`, $options: "i" } },
+                    { lastname: { $regex: `${search}`, $options: "i" } },
+                ],
+            });
+        }
+        else {
+            allUsers = yield schema_1.default.find();
+        }
         res.send(allUsers);
     }
     catch (error) {

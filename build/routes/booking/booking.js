@@ -83,9 +83,19 @@ bookingRoute.get("/appointment/:bookingId", tokenCheck_1.authJWT, (req, res, nex
 // );
 bookingRoute.post("/setavailability", tokenCheck_1.authJWT, creator_1.creatorAuth, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        //
-        const creator = yield schema_2.default.findByIdAndUpdate(req.user.creator, { $push: { "booking.availability": req.body } }, { new: true });
-        res.send(creator);
+        const checkAvail = yield (0, utility_1.checkAvailability)(req);
+        // clearAppointments(req);
+        if (checkAvail) {
+            const creator = yield schema_2.default.findByIdAndUpdate(req.user.creator, {
+                $push: {
+                    "booking.availability": req.body,
+                },
+            }, { new: true });
+            res.send(creator);
+        }
+        else {
+            next((0, http_errors_1.default)(400, "Availability already set for this time, pick another one!"));
+        }
     }
     catch (error) {
         next((0, http_errors_1.default)(500, error));

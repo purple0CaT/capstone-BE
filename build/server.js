@@ -23,7 +23,7 @@ const booking_1 = __importDefault(require("./routes/booking/booking"));
 exports.app = (0, express_1.default)();
 passport_1.default.use(loginGoogle_1.default);
 //
-exports.app.use((0, cors_1.default)());
+exports.app.use((0, cors_1.default)({ origin: process.env.CLIENT_URL }));
 exports.app.use(express_1.default.json());
 exports.app.use(passport_1.default.initialize());
 //
