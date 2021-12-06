@@ -21,29 +21,61 @@ const http_errors_1 = __importDefault(require("http-errors"));
 const followRoute = express_1.default.Router();
 // Follow smbdy
 followRoute.post("/:userId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    // console.log(req.user);
     try {
         //
         const myUser = yield schema_1.default.findById(req.user._id.toString());
+        const followedUser = yield schema_1.default.findById(req.params.userId);
         if (myUser.followers) {
-            const myFollower = yield schema_2.default.findByIdAndUpdate(myUser.followers, { $push: { youFollow: req.params.userId } }, { new: true });
+            yield schema_2.default.findByIdAndUpdate(myUser.followers, {
+                $push: {
+                    youFollow: {
+                        _id: followedUser._id,
+                        firstname: followedUser.firstname,
+                        lastname: followedUser.lastname,
+                        avatar: followedUser.avatar,
+                    },
+                },
+            });
         }
         else {
-            const myFollower = new schema_2.default({ youFollow: [req.params._id] });
+            const myFollower = new schema_2.default({
+                youFollow: [
+                    {
+                        _id: followedUser._id,
+                        firstname: followedUser.firstname,
+                        lastname: followedUser.lastname,
+                        avatar: followedUser.avatar,
+                    },
+                ],
+                followers: [],
+            });
             yield myFollower.save();
             myUser.followers = myFollower._id.toString();
             yield myUser.save();
         }
         //   followed user logic update
-        const followedUser = yield schema_1.default.findById(req.params.userId);
         if (followedUser.followers) {
             yield schema_2.default.findByIdAndUpdate(followedUser.followers.toString(), {
-                $push: { followers: myUser._id.toString() },
+                $push: {
+                    followers: {
+                        _id: req.user._id,
+                        firstname: req.user.firstname,
+                        lastname: req.user.lastname,
+                        avatar: req.user.avatar,
+                    },
+                },
             });
         }
         else {
             const newUserFollowers = new schema_2.default({
-                followers: [myUser._id.toString()],
+                followers: [
+                    {
+                        _id: req.user._id,
+                        firstname: req.user.firstname,
+                        lastname: req.user.lastname,
+                        avatar: req.user.avatar,
+                    },
+                ],
                 youFollow: [],
             });
             yield newUserFollowers.save();
@@ -61,9 +93,9 @@ followRoute.post("/:userId", tokenCheck_1.authJWT, (req, res, next) => __awaiter
 // Unfollow smbdy
 followRoute.delete("/:userId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const myFollowers = yield schema_2.default.findByIdAndUpdate(req.user.followers, { $pull: { youFollow: req.params.userId } }, { new: true });
+        const myFollowers = yield schema_2.default.findByIdAndUpdate(req.user.followers, { $pull: { youFollow: { _id: req.params.userId } } }, { new: true });
         const followedUser = yield schema_1.default.findById(req.params.userId);
-        const userFollowers = yield schema_2.default.findByIdAndUpdate(followedUser === null || followedUser === void 0 ? void 0 : followedUser.followers, { $pull: { followers: req.user._id } });
+        const userFollowers = yield schema_2.default.findByIdAndUpdate(followedUser === null || followedUser === void 0 ? void 0 : followedUser.followers, { $pull: { followers: { _id: req.user._id } } });
         res.send(myFollowers);
     }
     catch (error) {
