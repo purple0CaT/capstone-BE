@@ -19,6 +19,9 @@ const schema_1 = __importDefault(require("./schema"));
 const multer_storage_cloudinary_1 = require("multer-storage-cloudinary");
 const cloudinary_1 = require("cloudinary");
 const multer_1 = __importDefault(require("multer"));
+const mongoose_1 = __importDefault(require("mongoose"));
+//
+const ObjectId = mongoose_1.default.Types.ObjectId;
 //
 const postRoute = express_1.default.Router();
 const storage = new multer_storage_cloudinary_1.CloudinaryStorage({
@@ -38,7 +41,7 @@ postRoute.get("/", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, v
         res.send(allPosts);
     }
     catch (error) {
-        next((0, http_errors_1.default)(500));
+        next((0, http_errors_1.default)(500, error));
     }
 }));
 postRoute.get("/single/:postId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -47,7 +50,20 @@ postRoute.get("/single/:postId", tokenCheck_1.authJWT, (req, res, next) => __awa
         res.send(post);
     }
     catch (error) {
-        next((0, http_errors_1.default)(500));
+        next((0, http_errors_1.default)(500, error));
+    }
+}));
+postRoute.get("/userPosts/:userId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const post = yield schema_1.default.find({
+            "author._id": new ObjectId(req.params.userId),
+        })
+            .populate("comments")
+            .sort("-createdAt");
+        res.send(post);
+    }
+    catch (error) {
+        next((0, http_errors_1.default)(500, error));
     }
 }));
 postRoute.post("/likes/:postId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {

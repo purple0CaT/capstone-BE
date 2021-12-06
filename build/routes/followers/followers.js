@@ -17,6 +17,9 @@ const tokenCheck_1 = require("../../middlewares/authorization/tokenCheck");
 const schema_1 = __importDefault(require("../users/schema"));
 const schema_2 = __importDefault(require("../followers/schema"));
 const http_errors_1 = __importDefault(require("http-errors"));
+const mongoose_1 = __importDefault(require("mongoose"));
+//
+const ObjectId = mongoose_1.default.Types.ObjectId;
 //
 const followRoute = express_1.default.Router();
 // Follow smbdy
@@ -93,13 +96,16 @@ followRoute.post("/:userId", tokenCheck_1.authJWT, (req, res, next) => __awaiter
 // Unfollow smbdy
 followRoute.delete("/:userId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const myFollowers = yield schema_2.default.findByIdAndUpdate(req.user.followers, { $pull: { youFollow: { _id: req.params.userId } } }, { new: true });
+        const myFollowers = yield schema_2.default.findByIdAndUpdate(req.user.followers, { $pull: { youFollow: { _id: new ObjectId(req.params.userId) } } }, { new: true });
+        console.log(myFollowers);
         const followedUser = yield schema_1.default.findById(req.params.userId);
-        const userFollowers = yield schema_2.default.findByIdAndUpdate(followedUser === null || followedUser === void 0 ? void 0 : followedUser.followers, { $pull: { followers: { _id: req.user._id } } });
+        yield schema_2.default.findByIdAndUpdate(followedUser === null || followedUser === void 0 ? void 0 : followedUser.followers, {
+            $pull: { followers: { _id: req.user._id } },
+        });
         res.send(myFollowers);
     }
     catch (error) {
-        next((0, http_errors_1.default)(500));
+        next((0, http_errors_1.default)(500, error));
     }
 }));
 exports.default = followRoute;

@@ -5,6 +5,10 @@ import PostSchema from "./schema";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { v2 as cloudinary } from "cloudinary";
 import multer from "multer";
+import mongoose from "mongoose";
+//
+const ObjectId = mongoose.Types.ObjectId;
+
 //
 const postRoute = express.Router();
 const storage = new CloudinaryStorage({
@@ -23,24 +27,36 @@ postRoute.get("/", authJWT, async (req, res, next) => {
       .populate("comments");
     res.send(allPosts);
   } catch (error) {
-    next(createHttpError(500));
+    next(createHttpError(500, error as Error));
   }
 });
 postRoute.get("/single/:postId", authJWT, async (req, res, next) => {
   try {
     const post = await PostSchema.findById(req.params.postId).populate(
-      "comments"
+      "comments",
     );
     res.send(post);
   } catch (error) {
-    next(createHttpError(500));
+    next(createHttpError(500, error as Error));
+  }
+});
+postRoute.get("/userPosts/:userId", authJWT, async (req, res, next) => {
+  try {
+    const post = await PostSchema.find({
+      "author._id": new ObjectId(req.params.userId),
+    })
+      .populate("comments")
+      .sort("-createdAt");
+    res.send(post);
+  } catch (error) {
+    next(createHttpError(500, error as Error));
   }
 });
 postRoute.post("/likes/:postId", authJWT, async (req: any, res, next) => {
   try {
     const post: any = await PostSchema.findById(req.params.postId);
     const liked = post!.likes.some(
-      (L: string) => L === req.user._id.toString()
+      (L: string) => L === req.user._id.toString(),
     );
     if (liked) {
       await PostSchema.findByIdAndUpdate(req.params.postId, {
@@ -76,9 +92,9 @@ postRoute.post(
       await newPost.save();
       res.send(newPost);
     } catch (error) {
-      next(createHttpError(500, error as any));
+      next(createHttpError(500, error as Error));
     }
-  }
+  },
 );
 
 postRoute.put("/single/:postId", async (req, res, next) => {
@@ -86,11 +102,11 @@ postRoute.put("/single/:postId", async (req, res, next) => {
     const post = await PostSchema.findByIdAndUpdate(
       req.params.postId,
       req.body,
-      { new: true }
+      { new: true },
     ).populate("author");
     res.send(post);
   } catch (error) {
-    next(createHttpError(500, error as any));
+    next(createHttpError(500, error as Error));
   }
 });
 postRoute.delete("/single/:postId", async (req, res, next) => {
@@ -114,9 +130,9 @@ postRoute.put(
       });
       res.send(post);
     } catch (error) {
-      next(createHttpError(500, error as any));
+      next(createHttpError(500, error as Error));
     }
-  }
+  },
 );
 
 export default postRoute;

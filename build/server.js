@@ -32,13 +32,13 @@ exports.app.use("/register", register_1.default);
 exports.app.use("/login", login_1.default);
 exports.app.use("/user", user_1.default);
 exports.app.use("/post", post_1.default);
-exports.app.use("/follow", followers_1.default);
-exports.app.use("/chat", chat_1.default);
 exports.app.use("/creator", creator_1.default);
+exports.app.use("/comments", comment_1.default);
+exports.app.use("/chat", chat_1.default);
+exports.app.use("/follow", followers_1.default);
 exports.app.use("/shop", shop_1.default);
 exports.app.use("/order", order_1.default);
 exports.app.use("/booking", booking_1.default);
-exports.app.use("/comments", comment_1.default);
 //
 exports.app.use(errorHandlers_1.generalErrHandl);
 exports.app.use(errorHandlers_1.catchAllHandler);
