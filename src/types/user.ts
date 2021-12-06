@@ -8,6 +8,9 @@ export interface UserType {
   lastname: string;
   email: string;
   avatar: string;
+  backGround: string;
+  bio?: string;
+  nickname?: string;
   _id: string;
   password?: string;
   googleId?: string;

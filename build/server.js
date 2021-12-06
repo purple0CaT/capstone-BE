@@ -19,6 +19,7 @@ const creator_1 = __importDefault(require("./routes/creator/creator"));
 const shop_1 = __importDefault(require("./routes/shop/shop"));
 const order_1 = __importDefault(require("./routes/order/order"));
 const booking_1 = __importDefault(require("./routes/booking/booking"));
+const comment_1 = __importDefault(require("./routes/posts/comments/comment"));
 //
 exports.app = (0, express_1.default)();
 passport_1.default.use(loginGoogle_1.default);
@@ -37,6 +38,7 @@ exports.app.use("/creator", creator_1.default);
 exports.app.use("/shop", shop_1.default);
 exports.app.use("/order", order_1.default);
 exports.app.use("/booking", booking_1.default);
+exports.app.use("/comments", comment_1.default);
 //
 exports.app.use(errorHandlers_1.generalErrHandl);
 exports.app.use(errorHandlers_1.catchAllHandler);

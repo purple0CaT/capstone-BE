@@ -32,20 +32,42 @@ const storage = new multer_storage_cloudinary_1.CloudinaryStorage({
 //
 postRoute.get("/", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const allPosts = yield schema_1.default.find({});
+        const allPosts = yield schema_1.default.find({})
+            .sort("-createdAt")
+            .populate("comments");
         res.send(allPosts);
     }
     catch (error) {
         next((0, http_errors_1.default)(500));
     }
 }));
-postRoute.get("/:postId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+postRoute.get("/single/:postId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const post = yield schema_1.default.findById(req.params.postId);
+        const post = yield schema_1.default.findById(req.params.postId).populate("comments");
         res.send(post);
     }
     catch (error) {
         next((0, http_errors_1.default)(500));
+    }
+}));
+postRoute.post("/likes/:postId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const post = yield schema_1.default.findById(req.params.postId);
+        const liked = post.likes.some((L) => L === req.user._id.toString());
+        if (liked) {
+            yield schema_1.default.findByIdAndUpdate(req.params.postId, {
+                $pull: { likes: req.user._id.toString() },
+            });
+        }
+        else {
+            yield schema_1.default.findByIdAndUpdate(req.params.postId, {
+                $push: { likes: req.user._id.toString() },
+            });
+        }
+        res.send({ message: "Liked" });
+    }
+    catch (error) {
+        next((0, http_errors_1.default)(500, error));
     }
 }));
 //
@@ -64,7 +86,7 @@ postRoute.post("/", tokenCheck_1.authJWT, (0, multer_1.default)({ storage: stora
         next((0, http_errors_1.default)(500, error));
     }
 }));
-postRoute.put("/:postId", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+postRoute.put("/single/:postId", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const post = yield schema_1.default.findByIdAndUpdate(req.params.postId, req.body, { new: true }).populate("author");
         res.send(post);
@@ -73,7 +95,7 @@ postRoute.put("/:postId", (req, res, next) => __awaiter(void 0, void 0, void 0, 
         next((0, http_errors_1.default)(500, error));
     }
 }));
-postRoute.delete("/:postId", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+postRoute.delete("/single/:postId", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const post = yield schema_1.default.findByIdAndDelete(req.params.postId);
         res.status(201).send({ message: "Deleted!" });

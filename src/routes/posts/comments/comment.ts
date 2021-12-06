@@ -30,7 +30,15 @@ commentRoute.delete("/:commentId", authJWT, async (req: any, res, next) => {
 });
 commentRoute.post("/add/:postId", authJWT, async (req: any, res, next) => {
   try {
-    const comment = new CommentSchema(req.body);
+    const comment = new CommentSchema({
+      ...req.body,
+      author: {
+        _id: req.user._id,
+        firstname: req.user.firstname,
+        lastname: req.user.lastname,
+        avatar: req.user.avatar,
+      },
+    });
     await comment.save();
     const post = await PostSchema.findByIdAndUpdate(req.params.postId, {
       $push: { comments: comment._id },

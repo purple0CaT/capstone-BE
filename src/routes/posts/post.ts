@@ -18,18 +18,42 @@ const storage = new CloudinaryStorage({
 //
 postRoute.get("/", authJWT, async (req, res, next) => {
   try {
-    const allPosts = await PostSchema.find({});
+    const allPosts = await PostSchema.find({})
+      .sort("-createdAt")
+      .populate("comments");
     res.send(allPosts);
   } catch (error) {
     next(createHttpError(500));
   }
 });
-postRoute.get("/:postId", authJWT, async (req, res, next) => {
+postRoute.get("/single/:postId", authJWT, async (req, res, next) => {
   try {
-    const post = await PostSchema.findById(req.params.postId);
+    const post = await PostSchema.findById(req.params.postId).populate(
+      "comments"
+    );
     res.send(post);
   } catch (error) {
     next(createHttpError(500));
+  }
+});
+postRoute.post("/likes/:postId", authJWT, async (req: any, res, next) => {
+  try {
+    const post: any = await PostSchema.findById(req.params.postId);
+    const liked = post!.likes.some(
+      (L: string) => L === req.user._id.toString()
+    );
+    if (liked) {
+      await PostSchema.findByIdAndUpdate(req.params.postId, {
+        $pull: { likes: req.user._id.toString() },
+      });
+    } else {
+      await PostSchema.findByIdAndUpdate(req.params.postId, {
+        $push: { likes: req.user._id.toString() },
+      });
+    }
+    res.send({ message: "Liked" });
+  } catch (error) {
+    next(createHttpError(500, error as Error));
   }
 });
 //
@@ -57,7 +81,7 @@ postRoute.post(
   }
 );
 
-postRoute.put("/:postId", async (req, res, next) => {
+postRoute.put("/single/:postId", async (req, res, next) => {
   try {
     const post = await PostSchema.findByIdAndUpdate(
       req.params.postId,
@@ -69,7 +93,7 @@ postRoute.put("/:postId", async (req, res, next) => {
     next(createHttpError(500, error as any));
   }
 });
-postRoute.delete("/:postId", async (req, res, next) => {
+postRoute.delete("/single/:postId", async (req, res, next) => {
   try {
     const post = await PostSchema.findByIdAndDelete(req.params.postId);
     res.status(201).send({ message: "Deleted!" });

@@ -87,7 +87,7 @@ userRoute.put(
     }
   }
 );
-userRoute.get("/:userId", authJWT, async (req, res, next) => {
+userRoute.get("/single/:userId", authJWT, async (req, res, next) => {
   try {
     const user = await UserSchema.findById(req.params.userId);
     const followers = await FollowSchema.findById(user!.followers).populate([

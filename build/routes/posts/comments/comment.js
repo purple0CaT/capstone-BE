@@ -47,7 +47,12 @@ commentRoute.delete("/:commentId", tokenCheck_1.authJWT, (req, res, next) => __a
 }));
 commentRoute.post("/add/:postId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const comment = new schema_1.default(req.body);
+        const comment = new schema_1.default(Object.assign(Object.assign({}, req.body), { author: {
+                _id: req.user._id,
+                firstname: req.user.firstname,
+                lastname: req.user.lastname,
+                avatar: req.user.avatar,
+            } }));
         yield comment.save();
         const post = yield schema_2.default.findByIdAndUpdate(req.params.postId, {
             $push: { comments: comment._id },

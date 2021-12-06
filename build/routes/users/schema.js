@@ -27,7 +27,14 @@ const UserSchema = new Schema({
         },
     },
     refreshToken: { type: String, required: false },
+    bio: { type: String, required: false },
+    nickname: { type: String, required: false },
     email: { type: String, required: true, lowercase: true },
+    backGround: {
+        type: String,
+        required: false,
+        default: "https://opengameart.org/sites/default/files/landscape_4.png",
+    },
     avatar: {
         type: String,
         required: false,

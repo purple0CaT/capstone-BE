@@ -13,6 +13,7 @@ import creatorRoute from "./routes/creator/creator";
 import shopRoute from "./routes/shop/shop";
 import orderRoute from "./routes/order/order";
 import bookingRoute from "./routes/booking/booking";
+import commentRoute from "./routes/posts/comments/comment";
 //
 export const app = express();
 passport.use(googleStrategy);
@@ -31,6 +32,7 @@ app.use("/creator", creatorRoute);
 app.use("/shop", shopRoute);
 app.use("/order", orderRoute);
 app.use("/booking", bookingRoute);
+app.use("/comments", commentRoute);
 //
 app.use(generalErrHandl as any);
 app.use(catchAllHandler as any);
