@@ -32,6 +32,7 @@ followRoute.post("/:userId", authJWT, async (req: any, res, next) => {
             avatar: followedUser.avatar,
           },
         ],
+        followers: [],
       });
       await myFollower.save();
       myUser!.followers = myFollower._id.toString();
