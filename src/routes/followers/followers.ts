@@ -7,31 +7,58 @@ import createHttpError from "http-errors";
 const followRoute = express.Router();
 // Follow smbdy
 followRoute.post("/:userId", authJWT, async (req: any, res, next) => {
-  // console.log(req.user);
   try {
     //
     const myUser = await UserSchema.findById(req.user._id.toString());
+    const followedUser: any = await UserSchema.findById(req.params.userId);
     if (myUser!.followers) {
-      const myFollower = await FollowSchema.findByIdAndUpdate(
-        myUser!.followers,
-        { $push: { youFollow: req.params.userId } },
-        { new: true }
-      );
+      await FollowSchema.findByIdAndUpdate(myUser!.followers, {
+        $push: {
+          youFollow: {
+            _id: followedUser._id,
+            firstname: followedUser.firstname,
+            lastname: followedUser.lastname,
+            avatar: followedUser.avatar,
+          },
+        },
+      });
     } else {
-      const myFollower = new FollowSchema({ youFollow: [req.params._id] });
+      const myFollower = new FollowSchema({
+        youFollow: [
+          {
+            _id: followedUser._id,
+            firstname: followedUser.firstname,
+            lastname: followedUser.lastname,
+            avatar: followedUser.avatar,
+          },
+        ],
+      });
       await myFollower.save();
       myUser!.followers = myFollower._id.toString();
       await myUser!.save();
     }
     //   followed user logic update
-    const followedUser = await UserSchema.findById(req.params.userId);
-    if (followedUser!.followers) {
+    if (followedUser.followers) {
       await FollowSchema.findByIdAndUpdate(followedUser!.followers.toString(), {
-        $push: { followers: myUser!._id.toString() },
+        $push: {
+          followers: {
+            _id: req.user._id,
+            firstname: req.user.firstname,
+            lastname: req.user.lastname,
+            avatar: req.user.avatar,
+          },
+        },
       });
     } else {
       const newUserFollowers = new FollowSchema({
-        followers: [myUser!._id.toString()],
+        followers: [
+          {
+            _id: req.user._id,
+            firstname: req.user.firstname,
+            lastname: req.user.lastname,
+            avatar: req.user.avatar,
+          },
+        ],
         youFollow: [],
       });
       await newUserFollowers.save();
@@ -50,13 +77,13 @@ followRoute.delete("/:userId", authJWT, async (req: any, res, next) => {
   try {
     const myFollowers = await FollowSchema.findByIdAndUpdate(
       req.user.followers,
-      { $pull: { youFollow: req.params.userId } },
-      { new: true }
+      { $pull: { youFollow: { _id: req.params.userId } } },
+      { new: true },
     );
     const followedUser = await UserSchema.findById(req.params.userId);
     const userFollowers = await FollowSchema.findByIdAndUpdate(
       followedUser?.followers,
-      { $pull: { followers: req.user._id } }
+      { $pull: { followers: { _id: req.user._id } } },
     );
     res.send(myFollowers);
   } catch (error) {

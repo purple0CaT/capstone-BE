@@ -10,7 +10,7 @@ export interface UserType {
   avatar: string;
   backGround: string;
   bio?: string;
-  nickname?: string;
+  nickname: string;
   _id: string;
   password?: string;
   googleId?: string;
