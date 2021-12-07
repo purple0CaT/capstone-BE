@@ -42,7 +42,7 @@ userRoute
                     { firstname: { $regex: `${search}`, $options: "i" } },
                     { lastname: { $regex: `${search}`, $options: "i" } },
                 ],
-            });
+            }).select(["_id", "firstname", "lastname", "email", "avatar"]);
         }
         else {
             allUsers = yield schema_1.default.find();

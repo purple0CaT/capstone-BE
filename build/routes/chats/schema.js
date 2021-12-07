@@ -12,7 +12,10 @@ exports.MessageSchema = new Schema({
 }, { timestamps: true });
 const ChatSchema = new Schema({
     name: { type: String, required: false, default: "Some chat" },
-    image: { type: String },
+    image: {
+        type: String,
+        default: "https://p.kindpng.com/picc/s/262-2620686_ottawa-city-landscape-city-landscape-png-transparent-png.png",
+    },
     members: [{ type: Object }],
     history: [{ type: exports.MessageSchema, required: false }],
 });

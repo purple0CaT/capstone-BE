@@ -29,7 +29,7 @@ userRoute
             { firstname: { $regex: `${search}`, $options: "i" } },
             { lastname: { $regex: `${search}`, $options: "i" } },
           ],
-        });
+        }).select(["_id", "firstname", "lastname", "email", "avatar"]);
       } else {
         allUsers = await UserSchema.find();
       }
@@ -79,13 +79,13 @@ userRoute.put(
         {
           avatar: req.file.path,
         },
-        { new: true }
+        { new: true },
       );
       res.send(user);
     } catch (error) {
       next(createHttpError(500, error as any));
     }
-  }
+  },
 );
 userRoute.get("/single/:userId", authJWT, async (req, res, next) => {
   try {

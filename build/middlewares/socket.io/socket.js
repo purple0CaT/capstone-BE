@@ -18,10 +18,9 @@ const token_1 = require("../../routes/auth/tokens/token");
 const schema_1 = __importDefault(require("../../routes/users/schema"));
 const ioAuthorization = (socket, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        // console.log("Middleware =>", socket.id);
-        // const accessToken = socket.handshake.auth.accessToken;
+        const accessToken = socket.handshake.auth.accessToken;
         // const requestForm = cookie.parse(socket.handshake.headers.cookie);
-        const accessToken = socket.handshake.headers.auth;
+        // const accessToken = socket.handshake.headers.auth;
         if (accessToken) {
             const { _id } = (yield (0, token_1.verifyJWT)(accessToken));
             const user = yield schema_1.default.findById(_id);

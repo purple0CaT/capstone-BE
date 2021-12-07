@@ -34,7 +34,7 @@ io.on("connection", async (socket: any) => {
       {
         $push: { history: newMessage },
       },
-      { new: true }
+      { new: true },
     );
     const allChats = await ChatSchema.find({
       "members._id": socket.user._id,

@@ -33,7 +33,7 @@ const storage = new multer_storage_cloudinary_1.CloudinaryStorage({
 });
 //
 const chatRoute = express_1.default.Router();
-chatRoute.get("/:chatId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+chatRoute.get("/single/:chatId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const chat = yield schema_2.default.findById(req.params.chatId);
         if (chat) {
@@ -47,13 +47,29 @@ chatRoute.get("/:chatId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(vo
         next((0, http_errors_1.default)(500, error));
     }
 }));
-chatRoute.delete("/:chatId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+chatRoute.get("/userChats", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const allChats = yield schema_2.default.find({
+            "members._id": req.user._id,
+        });
+        if (allChats) {
+            res.send(allChats);
+        }
+        else {
+            next((0, http_errors_1.default)(404, "Chat not found!"));
+        }
+    }
+    catch (error) {
+        next((0, http_errors_1.default)(500, error));
+    }
+}));
+chatRoute.delete("/single/:chatId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const chat = yield schema_2.default.findByIdAndDelete(req.params.chatId);
     // console.log(chat);
     res.status(204).send({ message: "Deleted!" });
 }));
 //
-chatRoute.put("/:chatId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+chatRoute.put("/single/:chatId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const chat = yield schema_2.default.findByIdAndUpdate(req.params.chatId, req.body, { new: true });
         res.send(chat);
@@ -83,7 +99,7 @@ chatRoute.post("/createChat/:userId", tokenCheck_1.authJWT, (req, res, next) => 
                 avatar: req.user.avatar,
             },
             {
-                _id: addedUser._id,
+                _id: new ObjectId(addedUser._id),
                 firstname: addedUser.firstname,
                 lastname: addedUser.lastname,
                 avatar: addedUser.avatar,
@@ -91,7 +107,10 @@ chatRoute.post("/createChat/:userId", tokenCheck_1.authJWT, (req, res, next) => 
         ];
         const newChat = new schema_2.default(Object.assign(Object.assign({}, req.body), { members: membersArray }));
         yield newChat.save();
-        res.send({ chat: newChat });
+        const allChats = yield schema_2.default.find({
+            "members._id": req.user._id,
+        });
+        res.send({ newChat: newChat, allChats });
     }
     catch (error) {
         next((0, http_errors_1.default)(500, error));

@@ -19,7 +19,7 @@ const storage = new CloudinaryStorage({
 });
 //
 const chatRoute = express.Router();
-chatRoute.get("/:chatId", authJWT, async (req, res, next) => {
+chatRoute.get("/single/:chatId", authJWT, async (req, res, next) => {
   try {
     const chat = await ChatSchema.findById(req.params.chatId);
     if (chat) {
@@ -31,18 +31,32 @@ chatRoute.get("/:chatId", authJWT, async (req, res, next) => {
     next(createHttpError(500, error as any));
   }
 });
-chatRoute.delete("/:chatId", authJWT, async (req, res, next) => {
+chatRoute.get("/userChats", authJWT, async (req: any, res, next) => {
+  try {
+    const allChats = await ChatSchema.find({
+      "members._id": req.user._id,
+    });
+    if (allChats) {
+      res.send(allChats);
+    } else {
+      next(createHttpError(404, "Chat not found!"));
+    }
+  } catch (error) {
+    next(createHttpError(500, error as any));
+  }
+});
+chatRoute.delete("/single/:chatId", authJWT, async (req, res, next) => {
   const chat = await ChatSchema.findByIdAndDelete(req.params.chatId);
   // console.log(chat);
   res.status(204).send({ message: "Deleted!" });
 });
 //
-chatRoute.put("/:chatId", authJWT, async (req: any, res, next) => {
+chatRoute.put("/single/:chatId", authJWT, async (req: any, res, next) => {
   try {
     const chat = await ChatSchema.findByIdAndUpdate(
       req.params.chatId,
       req.body,
-      { new: true }
+      { new: true },
     );
     res.send(chat);
   } catch (error) {
@@ -58,13 +72,13 @@ chatRoute.put(
       const chat = await ChatSchema.findByIdAndUpdate(
         req.params.chatId,
         req.body,
-        { new: true }
+        { new: true },
       );
       res.send(chat);
     } catch (error) {
       next(createHttpError(500, error as any));
     }
-  }
+  },
 );
 //
 chatRoute.post("/createChat/:userId", authJWT, async (req: any, res, next) => {
@@ -78,7 +92,7 @@ chatRoute.post("/createChat/:userId", authJWT, async (req: any, res, next) => {
         avatar: req.user!.avatar,
       },
       {
-        _id: addedUser!._id,
+        _id: new ObjectId(addedUser!._id),
         firstname: addedUser!.firstname,
         lastname: addedUser!.lastname,
         avatar: addedUser!.avatar,
@@ -86,7 +100,11 @@ chatRoute.post("/createChat/:userId", authJWT, async (req: any, res, next) => {
     ];
     const newChat = new ChatSchema({ ...req.body, members: membersArray });
     await newChat.save();
-    res.send({ chat: newChat });
+    const allChats = await ChatSchema.find({
+      "members._id": req.user._id,
+    });
+
+    res.send({ newChat: newChat, allChats });
   } catch (error) {
     next(createHttpError(500, error as any));
   }
@@ -110,7 +128,7 @@ chatRoute.post(
             },
           },
         },
-        { new: true }
+        { new: true },
       );
       const allChats = await ChatSchema.find({
         "members._id": req.user._id,
@@ -120,7 +138,7 @@ chatRoute.post(
       // console.log(error)
       next(createHttpError(500, error as any));
     }
-  }
+  },
 );
 chatRoute.delete(
   "/deleteUser/:userId/:chatId",
@@ -132,7 +150,7 @@ chatRoute.delete(
         {
           $pull: { members: { _id: new ObjectId(req.params.userId) } },
         },
-        { new: true }
+        { new: true },
       );
       const Chats = await ChatSchema.find({
         "members._id": req.user._id,
@@ -142,7 +160,7 @@ chatRoute.delete(
       // console.log(error);
       next(createHttpError(500, error as any));
     }
-  }
+  },
 );
 
 export default chatRoute;

@@ -6,10 +6,9 @@ import UserSchema from "../../routes/users/schema";
 
 export const ioAuthorization = async (socket: any, next: NextFunction) => {
   try {
-    // console.log("Middleware =>", socket.id);
-    // const accessToken = socket.handshake.auth.accessToken;
+    const accessToken = socket.handshake.auth.accessToken;
     // const requestForm = cookie.parse(socket.handshake.headers.cookie);
-    const accessToken = socket.handshake.headers.auth;
+    // const accessToken = socket.handshake.headers.auth;
     if (accessToken) {
       const { _id } = (await verifyJWT(accessToken)) as any;
       const user = await UserSchema.findById(_id);
