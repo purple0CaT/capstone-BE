@@ -91,26 +91,37 @@ chatRoute.put("/image/:chatId", (0, multer_1.default)({ storage: storage }).sing
 chatRoute.post("/createChat/:userId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const addedUser = yield schema_1.default.findById(req.params.userId);
-        const membersArray = [
-            {
-                _id: req.user._id,
-                firstname: req.user.firstname,
-                lastname: req.user.lastname,
-                avatar: req.user.avatar,
-            },
-            {
-                _id: new ObjectId(addedUser._id),
-                firstname: addedUser.firstname,
-                lastname: addedUser.lastname,
-                avatar: addedUser.avatar,
-            },
-        ];
-        const newChat = new schema_2.default(Object.assign(Object.assign({}, req.body), { members: membersArray }));
-        yield newChat.save();
-        const allChats = yield schema_2.default.find({
-            "members._id": req.user._id,
+        const checkCreatedChat = yield schema_2.default.find({
+            $and: [
+                { "members._id": req.user._id },
+                { "members._id": new ObjectId(req.params.userId) },
+            ],
         });
-        res.send({ newChat: newChat, allChats });
+        if (checkCreatedChat.length === 0) {
+            const membersArray = [
+                {
+                    _id: req.user._id,
+                    firstname: req.user.firstname,
+                    lastname: req.user.lastname,
+                    avatar: req.user.avatar,
+                },
+                {
+                    _id: new ObjectId(addedUser._id),
+                    firstname: addedUser.firstname,
+                    lastname: addedUser.lastname,
+                    avatar: addedUser.avatar,
+                },
+            ];
+            const newChat = new schema_2.default(Object.assign(Object.assign({}, req.body), { members: membersArray }));
+            yield newChat.save();
+            const allChats = yield schema_2.default.find({
+                "members._id": req.user._id,
+            });
+            res.send({ newChat: newChat, allChats });
+        }
+        else {
+            next((0, http_errors_1.default)(400, "Chat already created"));
+        }
     }
     catch (error) {
         next((0, http_errors_1.default)(500, error));
