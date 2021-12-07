@@ -84,27 +84,36 @@ chatRoute.put(
 chatRoute.post("/createChat/:userId", authJWT, async (req: any, res, next) => {
   try {
     const addedUser = await UserSchema.findById(req.params.userId);
-    const membersArray = [
-      {
-        _id: req.user!._id,
-        firstname: req.user!.firstname,
-        lastname: req.user!.lastname,
-        avatar: req.user!.avatar,
-      },
-      {
-        _id: new ObjectId(addedUser!._id),
-        firstname: addedUser!.firstname,
-        lastname: addedUser!.lastname,
-        avatar: addedUser!.avatar,
-      },
-    ];
-    const newChat = new ChatSchema({ ...req.body, members: membersArray });
-    await newChat.save();
-    const allChats = await ChatSchema.find({
-      "members._id": req.user._id,
+    const checkCreatedChat = await ChatSchema.find({
+      $and: [
+        { "members._id": req.user._id },
+        { "members._id": new ObjectId(req.params.userId) },
+      ],
     });
-
-    res.send({ newChat: newChat, allChats });
+    if (checkCreatedChat.length === 0) {
+      const membersArray = [
+        {
+          _id: req.user!._id,
+          firstname: req.user!.firstname,
+          lastname: req.user!.lastname,
+          avatar: req.user!.avatar,
+        },
+        {
+          _id: new ObjectId(addedUser!._id),
+          firstname: addedUser!.firstname,
+          lastname: addedUser!.lastname,
+          avatar: addedUser!.avatar,
+        },
+      ];
+      const newChat = new ChatSchema({ ...req.body, members: membersArray });
+      await newChat.save();
+      const allChats = await ChatSchema.find({
+        "members._id": req.user._id,
+      });
+      res.send({ newChat: newChat, allChats });
+    } else {
+      next(createHttpError(400, "Chat already created"));
+    }
   } catch (error) {
     next(createHttpError(500, error as any));
   }
