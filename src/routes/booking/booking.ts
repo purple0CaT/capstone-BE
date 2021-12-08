@@ -5,7 +5,13 @@ import BookingSchema from "./schema";
 import CreatorSchema from "./../creator/schema";
 import { creatorAuth } from "../../middlewares/creator/creator";
 import UserSchema from "../users/schema";
-import { checkAvailability, checkFreeDays, clearAppointments } from "./utility";
+import {
+  checkAvailability,
+  checkEmptyAvail,
+  checkFreeDays,
+  clearAppointments,
+} from "./utility";
+import { CreatorType } from "../../types/creator";
 //
 const bookingRoute = express.Router();
 //
@@ -40,7 +46,7 @@ bookingRoute.post(
         const creator = await CreatorSchema.findByIdAndUpdate(
           req.params.creatorId,
           { $push: { "booking.appointments": newAppointment._id } },
-          { new: true }
+          { new: true },
         );
         res.send({ creator, newAppointment });
       } else {
@@ -50,7 +56,7 @@ bookingRoute.post(
       console.log(error);
       next(createHttpError(500, error as Error));
     }
-  }
+  },
 );
 bookingRoute.get("/appointment/:bookingId", authJWT, async (req, res, next) => {
   try {
@@ -60,22 +66,28 @@ bookingRoute.get("/appointment/:bookingId", authJWT, async (req, res, next) => {
     next(createHttpError(500, error as Error));
   }
 });
-// bookingRoute.post(
-//   "/appointment/:bookingId",
-//   authJWT,
-//   async (req, res, next) => {
-//     try {
-//       const specific = await BookingSchema.findByIdAndUpdate(
-//         req.params.bookingId,
-//         req.body,
-//         { new: true }
-//       );
-//       res.send(specific);
-//     } catch (error) {
-//       next(createHttpError(500, error as Error));
-//     }
-//   }
-// );
+bookingRoute.get(
+  "/freeappointments/:creatorId",
+  authJWT,
+  async (req, res, next) => {
+    try {
+      const creator: any = await CreatorSchema.findById(req.params.creatorId);
+      const allApp = await Promise.all(
+        creator.booking.appointments.map(
+          async (A: string) => await BookingSchema.findById(A),
+        ),
+      );
+      const availability = creator.booking.availability;
+      const checkEmptyAvailability = checkEmptyAvail(allApp, availability);
+      // console.log(availability);
+      // console.log(allApp);
+      // console.log(allOne);
+      res.send({ availability: checkEmptyAvailability });
+    } catch (error) {
+      next(createHttpError(500, error as Error));
+    }
+  },
+);
 bookingRoute.post(
   "/setavailability",
   authJWT,
@@ -92,20 +104,20 @@ bookingRoute.post(
               "booking.availability": req.body,
             },
           },
-          { new: true }
+          { new: true },
         );
         res.send(creator);
       } else {
         next(
           createHttpError(
             400,
-            "Availability already set for this time, pick another one!"
-          )
+            "Availability already set for this time, pick another one!",
+          ),
         );
       }
     } catch (error) {
       next(createHttpError(500, error as Error));
     }
-  }
+  },
 );
 export default bookingRoute;

@@ -66,22 +66,21 @@ bookingRoute.get("/appointment/:bookingId", tokenCheck_1.authJWT, (req, res, nex
         next((0, http_errors_1.default)(500, error));
     }
 }));
-// bookingRoute.post(
-//   "/appointment/:bookingId",
-//   authJWT,
-//   async (req, res, next) => {
-//     try {
-//       const specific = await BookingSchema.findByIdAndUpdate(
-//         req.params.bookingId,
-//         req.body,
-//         { new: true }
-//       );
-//       res.send(specific);
-//     } catch (error) {
-//       next(createHttpError(500, error as Error));
-//     }
-//   }
-// );
+bookingRoute.get("/freeappointments/:creatorId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const creator = yield schema_2.default.findById(req.params.creatorId);
+        const allApp = yield Promise.all(creator.booking.appointments.map((A) => __awaiter(void 0, void 0, void 0, function* () { return yield schema_1.default.findById(A); })));
+        const availability = creator.booking.availability;
+        const checkEmptyAvailability = (0, utility_1.checkEmptyAvail)(allApp, availability);
+        // console.log(availability);
+        // console.log(allApp);
+        // console.log(allOne);
+        res.send({ availability: checkEmptyAvailability });
+    }
+    catch (error) {
+        next((0, http_errors_1.default)(500, error));
+    }
+}));
 bookingRoute.post("/setavailability", tokenCheck_1.authJWT, creator_1.creatorAuth, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const checkAvail = yield (0, utility_1.checkAvailability)(req);

@@ -38,7 +38,7 @@ creatorRoute.get("/me", tokenCheck_1.authJWT, creator_1.creatorAuth, (req, res, 
 }));
 creatorRoute.get("/single/:creatorId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const appointments = yield schema_3.default.findById(req.params.creatorId).populate("booking.appointments");
+        const appointments = yield schema_3.default.findById(req.params.creatorId).populate(["booking.appointments", "shop.items"]);
         res.send(appointments);
     }
     catch (error) {

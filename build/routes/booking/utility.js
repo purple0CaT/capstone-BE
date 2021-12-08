@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.clearAppointments = exports.checkAvailability = exports.checkFreeDays = void 0;
+exports.checkEmptyAvail = exports.clearAppointments = exports.checkAvailability = exports.checkFreeDays = void 0;
 const http_errors_1 = __importDefault(require("http-errors"));
 const schema_1 = __importDefault(require("./schema"));
 const schema_2 = __importDefault(require("./../creator/schema"));
@@ -74,3 +74,33 @@ const clearAppointments = (req) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.clearAppointments = clearAppointments;
+// ==============
+const checkEmptyAvail = (app, avail) => {
+    // const availebelApps = avail.map((AV: any) => {
+    //   if(AV.start<=app.)
+    // });
+    const test = [];
+    for (let av = 0; av < avail.length; av++) {
+        for (let ap = 0; ap < app.length; ap++) {
+            if (avail[av].start <= app[ap].appointmentDate &&
+                avail[av].end >=
+                    app[ap].appointmentDate.setHours(app[ap].appointmentDate.getHours() + 1) &&
+                avail[av].end >=
+                    app[ap].appointmentDate.setHours(app[ap].appointmentDate.getHours() + 2) &&
+                avail[av].end >=
+                    app[ap].appointmentDate.setHours(app[ap].appointmentDate.getHours() + 2)) {
+                test.push(avail[av]);
+            }
+        }
+    }
+    const duplicate = Array.from(new Set(test));
+    console.log(duplicate);
+    const testCheck = avail[0].start <= app[0].appointmentDate;
+    const availArr = avail.filter((A) => !duplicate.includes(A));
+    // console.log("appointments ======>", app);
+    console.log("AVAILABILITY ======>", avail);
+    console.log(availArr);
+    // console.log(avail);
+    // console.log(duplicate);
+};
+exports.checkEmptyAvail = checkEmptyAvail;
