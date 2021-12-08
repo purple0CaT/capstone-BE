@@ -23,19 +23,17 @@ loginRoute.post("/", (req, res, next) => __awaiter(void 0, void 0, void 0, funct
     try {
         const { email, password } = req.body;
         const user = yield schema_1.default.CheckCredentials(email, password);
-        // console.log(user)
         if (user) {
             const { accessToken, refreshToken } = yield (0, token_1.generateJWT)(user);
             user.refreshToken = refreshToken;
-            yield user.save();
             res.send({ user, tokens: { accessToken, refreshToken } });
         }
         else {
-            next((0, http_errors_1.default)(401));
+            next((0, http_errors_1.default)(401, "Not founded"));
         }
     }
     catch (error) {
-        next((0, http_errors_1.default)(400));
+        next((0, http_errors_1.default)(400, error._message));
     }
 }));
 //
@@ -46,7 +44,7 @@ loginRoute.get("/googleRed", passport_1.default.authenticate("google"), (req, re
         res.redirect(`${process.env.URL}`);
     }
     catch (error) {
-        next((0, http_errors_1.default)(500));
+        next((0, http_errors_1.default)(500, error));
     }
 }));
 exports.default = loginRoute;

@@ -35,7 +35,7 @@ chatRoute.get("/userChats", authJWT, async (req: any, res, next) => {
   try {
     const allChats = await ChatSchema.find({
       "members._id": req.user._id,
-    });
+    }).sort("-updatedAt");
     if (allChats) {
       res.send(allChats);
     } else {
@@ -109,8 +109,8 @@ chatRoute.post("/createChat/:userId", authJWT, async (req: any, res, next) => {
       await newChat.save();
       const allChats = await ChatSchema.find({
         "members._id": req.user._id,
-      });
-      res.send({ newChat: newChat, allChats });
+      }).sort("-updatedAt");
+      res.send({ newChat, allChats });
     } else {
       next(createHttpError(400, "Chat already created"));
     }
@@ -141,7 +141,7 @@ chatRoute.post(
       );
       const allChats = await ChatSchema.find({
         "members._id": req.user._id,
-      });
+      }).sort("-updatedAt");
       res.send({ chat, allChats });
     } catch (error) {
       // console.log(error)
@@ -163,7 +163,7 @@ chatRoute.delete(
       );
       const Chats = await ChatSchema.find({
         "members._id": req.user._id,
-      });
+      }).sort("-updatedAt");
       res.send({ chat: Mychat, allChats: Chats });
     } catch (error) {
       // console.log(error);
@@ -171,5 +171,19 @@ chatRoute.delete(
     }
   },
 );
-
+chatRoute.delete(
+  "/deleteChat/:chatId",
+  authJWT,
+  async (req: any, res, next) => {
+    try {
+      const delChat = await ChatSchema.findByIdAndDelete(req.params.chatId);
+      const allChats = await ChatSchema.find({
+        "members._id": req.user._id,
+      }).sort("-updatedAt");
+      res.send({ chat: allChats[0], allChats });
+    } catch (error) {
+      next(createHttpError(500, error as any));
+    }
+  },
+);
 export default chatRoute;

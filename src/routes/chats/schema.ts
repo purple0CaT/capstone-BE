@@ -8,15 +8,20 @@ export const MessageSchema = new Schema(
   },
   { timestamps: true },
 );
-const ChatSchema = new Schema({
-  name: { type: String, required: false, default: "Some chat" },
-  image: {
-    type: String,
-    default:
-      "https://p.kindpng.com/picc/s/262-2620686_ottawa-city-landscape-city-landscape-png-transparent-png.png",
+const ChatSchema = new Schema(
+  {
+    name: { type: String, required: false, default: "Some chat" },
+    image: {
+      type: String,
+      default:
+        "https://p.kindpng.com/picc/s/262-2620686_ottawa-city-landscape-city-landscape-png-transparent-png.png",
+    },
+    members: [{ type: Object }],
+    history: [{ type: MessageSchema, required: false }],
   },
-  members: [{ type: Object }],
-  history: [{ type: MessageSchema, required: false }],
-});
+  {
+    timestamps: true,
+  },
+);
 
 export default model("Chat", ChatSchema);

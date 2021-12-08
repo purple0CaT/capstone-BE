@@ -14,7 +14,7 @@ io.use(ioAuthorization as any);
 io.on("connection", async (socket: any) => {
   const chats = await ChatSchema.find({
     "members._id": socket.user._id,
-  });
+  })
   chats.map((chat) => {
     socket.join(chat._id.toString());
   });
@@ -38,7 +38,7 @@ io.on("connection", async (socket: any) => {
     );
     const allChats = await ChatSchema.find({
       "members._id": socket.user._id,
-    });
+    }).sort("-updatedAt");
     io.in(room).emit("message", { chatHistory, allChats });
   });
   //========

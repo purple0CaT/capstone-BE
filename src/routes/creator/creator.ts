@@ -16,12 +16,22 @@ creatorRoute.get("/me", authJWT, creatorAuth, async (req: any, res, next) => {
       "shopping.cart",
     ]);
     const creatorInfo = await CreatorSchema.findById(req.user.creator).populate(
-      ["shop.items", "shop.orders"]
+      ["shop.items", "shop.orders"],
     );
     res.send({ creator: creatorInfo });
   } catch (error) {
     console.log(500);
     next(createHttpError(500, error as any));
+  }
+});
+creatorRoute.get("/single/:creatorId", authJWT, async (req, res, next) => {
+  try {
+    const appointments = await CreatorSchema.findById(
+      req.params.creatorId,
+    ).populate("booking.appointments");
+    res.send(appointments);
+  } catch (error) {
+    next(createHttpError(500, error as Error));
   }
 });
 creatorRoute.post("/beCreator", authJWT, async (req: any, res, next) => {
@@ -69,11 +79,11 @@ creatorRoute.delete(
   async (req: any, res, next) => {
     try {
       const creator: CreatorType | any = await CreatorSchema.findById(
-        req.user.creator
+        req.user.creator,
       );
       if (creator) {
         creator.shop.items.map(
-          async (I: any) => await ItemsSchema.findByIdAndDelete(I._id)
+          async (I: any) => await ItemsSchema.findByIdAndDelete(I._id),
         );
         //
         await CreatorSchema.findOneAndDelete(req.user.creator);
@@ -83,7 +93,7 @@ creatorRoute.delete(
           {
             creator: null,
           },
-          { new: true }
+          { new: true },
         );
         res.send(user);
       } else {
@@ -93,7 +103,7 @@ creatorRoute.delete(
       console.log(500);
       next(createHttpError(500, error as any));
     }
-  }
+  },
 );
 
 export default creatorRoute;

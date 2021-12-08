@@ -23,15 +23,16 @@ const utility_1 = require("./utility");
 //
 const bookingRoute = express_1.default.Router();
 //
-bookingRoute.get("/creator/:creatorId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const appointments = yield schema_1.default.findById(req.params.creatorId).populate("booking");
-        res.send(appointments);
-    }
-    catch (error) {
-        next((0, http_errors_1.default)(500, error));
-    }
-}));
+// bookingRoute.get("/creator/:creatorId", authJWT, async (req, res, next) => {
+//   try {
+//     const appointments = await CreatorSchema.findById(
+//       req.params.creatorId
+//     ).populate("booking.appointments");
+//     res.send(appointments);
+//   } catch (error) {
+//     next(createHttpError(500, error as Error));
+//   }
+// });
 bookingRoute.post("/createAppoint/:creatorId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { checkAppoint, checkBookings } = yield (0, utility_1.checkFreeDays)(req);

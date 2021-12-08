@@ -18,5 +18,7 @@ const ChatSchema = new Schema({
     },
     members: [{ type: Object }],
     history: [{ type: exports.MessageSchema, required: false }],
+}, {
+    timestamps: true,
 });
 exports.default = model("Chat", ChatSchema);

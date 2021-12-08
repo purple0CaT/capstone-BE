@@ -36,6 +36,15 @@ creatorRoute.get("/me", tokenCheck_1.authJWT, creator_1.creatorAuth, (req, res, 
         next((0, http_errors_1.default)(500, error));
     }
 }));
+creatorRoute.get("/single/:creatorId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const appointments = yield schema_3.default.findById(req.params.creatorId).populate("booking.appointments");
+        res.send(appointments);
+    }
+    catch (error) {
+        next((0, http_errors_1.default)(500, error));
+    }
+}));
 creatorRoute.post("/beCreator", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userInfo = yield schema_2.default.findById(req.user._id);

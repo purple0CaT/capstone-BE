@@ -48,7 +48,7 @@ io.on("connection", (socket) => __awaiter(void 0, void 0, void 0, function* () {
         }, { new: true });
         const allChats = yield schema_1.default.find({
             "members._id": socket.user._id,
-        });
+        }).sort("-updatedAt");
         io.in(room).emit("message", { chatHistory, allChats });
     }));
     //========

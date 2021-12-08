@@ -51,7 +51,7 @@ chatRoute.get("/userChats", tokenCheck_1.authJWT, (req, res, next) => __awaiter(
     try {
         const allChats = yield schema_2.default.find({
             "members._id": req.user._id,
-        });
+        }).sort("-updatedAt");
         if (allChats) {
             res.send(allChats);
         }
@@ -116,8 +116,8 @@ chatRoute.post("/createChat/:userId", tokenCheck_1.authJWT, (req, res, next) => 
             yield newChat.save();
             const allChats = yield schema_2.default.find({
                 "members._id": req.user._id,
-            });
-            res.send({ newChat: newChat, allChats });
+            }).sort("-updatedAt");
+            res.send({ newChat, allChats });
         }
         else {
             next((0, http_errors_1.default)(400, "Chat already created"));
@@ -143,7 +143,7 @@ chatRoute.post("/addUser/:userId/:chatId", tokenCheck_1.authJWT, (req, res, next
         }, { new: true });
         const allChats = yield schema_2.default.find({
             "members._id": req.user._id,
-        });
+        }).sort("-updatedAt");
         res.send({ chat, allChats });
     }
     catch (error) {
@@ -158,11 +158,23 @@ chatRoute.delete("/deleteUser/:userId/:chatId", tokenCheck_1.authJWT, (req, res,
         }, { new: true });
         const Chats = yield schema_2.default.find({
             "members._id": req.user._id,
-        });
+        }).sort("-updatedAt");
         res.send({ chat: Mychat, allChats: Chats });
     }
     catch (error) {
         // console.log(error);
+        next((0, http_errors_1.default)(500, error));
+    }
+}));
+chatRoute.delete("/deleteChat/:chatId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const delChat = yield schema_2.default.findByIdAndDelete(req.params.chatId);
+        const allChats = yield schema_2.default.find({
+            "members._id": req.user._id,
+        }).sort("-updatedAt");
+        res.send({ chat: allChats[0], allChats });
+    }
+    catch (error) {
         next((0, http_errors_1.default)(500, error));
     }
 }));

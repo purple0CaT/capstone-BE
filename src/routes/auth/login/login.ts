@@ -11,23 +11,21 @@ loginRoute.post("/", async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await UserSchema.CheckCredentials(email, password);
-    // console.log(user)
     if (user) {
       const { accessToken, refreshToken } = await generateJWT(user);
       user.refreshToken = refreshToken;
-      await user.save();
       res.send({ user, tokens: { accessToken, refreshToken } });
     } else {
-      next(createHttpError(401));
+      next(createHttpError(401, "Not founded"));
     }
-  } catch (error) {
-    next(createHttpError(400));
+  } catch (error: any) {
+    next(createHttpError(400, error._message));
   }
 });
 //
 loginRoute.get(
   "/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
+  passport.authenticate("google", { scope: ["profile", "email"] }),
 );
 loginRoute.get(
   "/googleRed",
@@ -37,9 +35,9 @@ loginRoute.get(
       res.send({ user: req.user.user, tokens: req.user.tokens });
       res.redirect(`${process.env.URL}`);
     } catch (error) {
-      next(createHttpError(500));
+      next(createHttpError(500, error as Error));
     }
-  }
+  },
 );
 
 export default loginRoute;

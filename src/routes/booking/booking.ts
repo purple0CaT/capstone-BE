@@ -9,16 +9,16 @@ import { checkAvailability, checkFreeDays, clearAppointments } from "./utility";
 //
 const bookingRoute = express.Router();
 //
-bookingRoute.get("/creator/:creatorId", authJWT, async (req, res, next) => {
-  try {
-    const appointments = await BookingSchema.findById(
-      req.params.creatorId
-    ).populate("booking");
-    res.send(appointments);
-  } catch (error) {
-    next(createHttpError(500, error as Error));
-  }
-});
+// bookingRoute.get("/creator/:creatorId", authJWT, async (req, res, next) => {
+//   try {
+//     const appointments = await CreatorSchema.findById(
+//       req.params.creatorId
+//     ).populate("booking.appointments");
+//     res.send(appointments);
+//   } catch (error) {
+//     next(createHttpError(500, error as Error));
+//   }
+// });
 bookingRoute.post(
   "/createAppoint/:creatorId",
   authJWT,
