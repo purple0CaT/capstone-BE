@@ -17,7 +17,7 @@ const UserSchema = new Schema({
   bio: { type: String, required: false },
   nickname: { type: String, required: true },
   email: { type: String, required: true, lowercase: true },
-  backGround: {
+  background: {
     type: String,
     required: false,
     default: "https://opengameart.org/sites/default/files/landscape_4.png",

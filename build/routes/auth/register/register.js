@@ -16,6 +16,7 @@ const express_1 = __importDefault(require("express"));
 const http_errors_1 = __importDefault(require("http-errors"));
 const schema_1 = __importDefault(require("../../users/schema"));
 const token_1 = require("../tokens/token");
+const schema_2 = __importDefault(require("./../../followers/schema"));
 const registerRoute = express_1.default.Router();
 //
 registerRoute.post("/", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -24,9 +25,16 @@ registerRoute.post("/", (req, res, next) => __awaiter(void 0, void 0, void 0, fu
         if (checkEmail)
             next((0, http_errors_1.default)(401, "Email already exists!"));
         //
+        const UserFollowers = new schema_2.default({
+            youFollow: [],
+            followers: [],
+        });
+        yield UserFollowers.save();
+        //
         const newUser = new schema_1.default(req.body);
         const { accessToken, refreshToken } = yield (0, token_1.generateJWT)(newUser);
         newUser.refreshToken = refreshToken;
+        newUser.followers = UserFollowers._id;
         yield newUser.save();
         res
             .status(201)

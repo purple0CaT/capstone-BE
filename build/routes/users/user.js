@@ -97,9 +97,33 @@ userRoute.put("/avatar", tokenCheck_1.authJWT, (0, multer_1.default)({ storage: 
         next((0, http_errors_1.default)(500, error));
     }
 }));
+userRoute.put("/background", tokenCheck_1.authJWT, (0, multer_1.default)({ storage: storage }).single("media"), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user = yield schema_1.default.findByIdAndUpdate(req.user._id, {
+            background: req.file.path,
+        }, { new: true });
+        res.send(user);
+    }
+    catch (error) {
+        next((0, http_errors_1.default)(500, error));
+    }
+}));
 userRoute.get("/single/:userId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = yield schema_1.default.findById(req.params.userId);
+        const followers = yield schema_2.default.findById(user.followers).populate([
+            "followers",
+            "youFollow",
+        ]);
+        res.send({ user, followers });
+    }
+    catch (error) {
+        next((0, http_errors_1.default)(500));
+    }
+}));
+userRoute.put("/single/:userId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user = yield schema_1.default.findByIdAndUpdate(req.params.userId, req.body);
         const followers = yield schema_2.default.findById(user.followers).populate([
             "followers",
             "youFollow",

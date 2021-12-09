@@ -87,9 +87,43 @@ userRoute.put(
     }
   },
 );
+userRoute.put(
+  "/background",
+  authJWT,
+  multer({ storage: storage }).single("media"),
+  async (req: any, res, next) => {
+    try {
+      const user = await UserSchema.findByIdAndUpdate(
+        req.user._id,
+        {
+          background: req.file.path,
+        },
+        { new: true },
+      );
+      res.send(user);
+    } catch (error) {
+      next(createHttpError(500, error as any));
+    }
+  },
+);
 userRoute.get("/single/:userId", authJWT, async (req, res, next) => {
   try {
     const user = await UserSchema.findById(req.params.userId);
+    const followers = await FollowSchema.findById(user!.followers).populate([
+      "followers",
+      "youFollow",
+    ]);
+    res.send({ user, followers });
+  } catch (error) {
+    next(createHttpError(500));
+  }
+});
+userRoute.put("/single/:userId", authJWT, async (req, res, next) => {
+  try {
+    const user = await UserSchema.findByIdAndUpdate(
+      req.params.userId,
+      req.body,
+    );
     const followers = await FollowSchema.findById(user!.followers).populate([
       "followers",
       "youFollow",
