@@ -43,17 +43,19 @@ creatorRoute.post("/beCreator", authJWT, async (req: any, res, next) => {
       const newItem1 = new ItemsSchema({
         title: "Landscape printed picture",
         price: 10,
-        descrition:
+        description:
           "Landscape printed picture of selected post with ratio: 16:9",
-        quantity: 10,
-        seller: req.user._id,
+        quantity: 99,
+        sellerId: req.user._id,
+        imgRatio: "16/9",
       });
       const newItem2 = new ItemsSchema({
         title: "Portret printed picture",
         price: 10,
-        descrition: "Portret printed picture of selected post with ratio: 3:4",
-        quantity: 10,
-        seller: req.user._id,
+        description: "Portret printed picture of selected post with ratio: 3:4",
+        quantity: 99,
+        sellerId: req.user._id,
+        imgRatio: "3/4",
       });
       await newItem1.save();
       await newItem2.save();

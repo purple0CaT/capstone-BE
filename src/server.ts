@@ -18,7 +18,7 @@ import commentRoute from "./routes/posts/comments/comment";
 export const app = express();
 passport.use(googleStrategy);
 //
-app.use(cors({ origin: process.env.CLIENT_URL }));
+app.use(cors({ origin: [process.env.CLIENT_URL!, process.env.URL!] }));
 app.use(express.json());
 app.use(passport.initialize());
 //

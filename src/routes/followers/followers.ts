@@ -85,7 +85,7 @@ followRoute.delete("/:userId", authJWT, async (req: any, res, next) => {
       { $pull: { youFollow: { _id: new ObjectId(req.params.userId) } } },
       { new: true },
     );
-    console.log(myFollowers);
+    // console.log(myFollowers);
     const followedUser = await UserSchema.findById(req.params.userId);
     await FollowSchema.findByIdAndUpdate(followedUser?.followers, {
       $pull: { followers: { _id: req.user._id } },

@@ -28,7 +28,7 @@ shopRoute.post(
       const newItem = new ItemsSchema({
         ...req.body,
         type: "user",
-        seller: req.user._id,
+        sellerId: req.user._id,
       });
       await newItem.save();
       //

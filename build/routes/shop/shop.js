@@ -36,7 +36,7 @@ shopRoute.get("/", tokenCheck_1.authJWT, creator_1.creatorAuth, (req, res, next)
 }));
 shopRoute.post("/addItem", tokenCheck_1.authJWT, creator_1.creatorAuth, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const newItem = new schema_2.ItemsSchema(Object.assign(Object.assign({}, req.body), { type: "user", seller: req.user._id }));
+        const newItem = new schema_2.ItemsSchema(Object.assign(Object.assign({}, req.body), { type: "user", sellerId: req.user._id }));
         yield newItem.save();
         //
         const creatorShop = yield schema_1.default.findByIdAndUpdate(req.user.creator, {

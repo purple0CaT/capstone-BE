@@ -96,7 +96,7 @@ followRoute.post("/:userId", tokenCheck_1.authJWT, (req, res, next) => __awaiter
 followRoute.delete("/:userId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const myFollowers = yield schema_2.default.findByIdAndUpdate(req.user.followers, { $pull: { youFollow: { _id: new ObjectId(req.params.userId) } } }, { new: true });
-        console.log(myFollowers);
+        // console.log(myFollowers);
         const followedUser = yield schema_1.default.findById(req.params.userId);
         yield schema_2.default.findByIdAndUpdate(followedUser === null || followedUser === void 0 ? void 0 : followedUser.followers, {
             $pull: { followers: { _id: req.user._id } },

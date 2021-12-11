@@ -23,7 +23,7 @@ orderRoute.get("/", authJWT, async (req: any, res, next) => {
   }
 });
 orderRoute.get(
-  "/:orderId",
+  "/one:orderId",
   authJWT,
   // creatorAuth,
   async (req: any, res, next) => {
@@ -33,7 +33,7 @@ orderRoute.get(
     } catch (error) {
       next(createHttpError(500, error as Error));
     }
-  }
+  },
 );
 // Only DEFAULT items
 orderRoute.get("/adminOrders", authJWT, async (req: any, res, next) => {
@@ -53,13 +53,13 @@ orderRoute.put(
       const order = await OrderSchema.findByIdAndUpdate(
         req.params.orderId,
         { deliveryCodeTracking: req.body.deliveryCodeTracking },
-        { new: true }
+        { new: true },
       );
       res.send(order);
     } catch (error) {
       next(createHttpError(500, error as Error));
     }
-  }
+  },
 );
 // ============= ORDER create|cancel
 orderRoute.post("/createOrder", authJWT, async (req: any, res, next) => {
@@ -68,29 +68,41 @@ orderRoute.post("/createOrder", authJWT, async (req: any, res, next) => {
     const newOrder = new OrderSchema({ ...req.body, customerId: req.user._id });
     await newOrder.save();
     // Update items quantity in store
-    req.body.items.map(
-      async (I: any) =>
-        await ItemsSchema.findByIdAndUpdate(I.item._id, {
-          $inc: { quantity: -I.qty },
-        })
+    await Promise.all(
+      req.body.items.map(
+        async (I: any) =>
+          await ItemsSchema.findByIdAndUpdate(I.item._id, {
+            $inc: { quantity: -I.qty },
+          }),
+      ),
     );
-    // user update
-    const myUser = await UserSchema.findByIdAndUpdate(
-      req.user._id,
-      {
-        $push: { "shopping.orders": newOrder._id },
-      },
-      { new: true }
+    // Customer user update
+    await UserSchema.findByIdAndUpdate(req.user._id, {
+      $push: { "shopping.orders": newOrder._id },
+    });
+    // Update Creator
+    await Promise.all(
+      req.body.items.map(async (Item: any) => {
+        const sellerUser = await UserSchema.findById(Item.item.sellerId);
+        const sellerCreator: any = await CreatorSchema.findById(
+          sellerUser!.creator?.toString(),
+        );
+        const checkAlready = sellerCreator.shop.orders.some(
+          (O: any) => O.toString() !== newOrder._id.toString(),
+        );
+        if (checkAlready) {
+          sellerCreator.shop.orders.push(newOrder._id);
+          // console.log(sellerCreator.shop.orders);
+          await sellerCreator.save();
+        }
+      }),
     );
-    //
-    const sellerUser = await UserSchema.findById(req.body.sellerId);
-    const sellerCreator = await CreatorSchema.findByIdAndUpdate(
-      sellerUser!.creator,
-      { $push: { "shop.orders": newOrder._id } },
-      { new: true }
-    );
+    // res.setHeader("Access-Control-Allow-Origin", "http://localhost:3003");
+
     res.status(201).send(newOrder);
+    // res.redirect(`/order/checkout-session/${newOrder._id}`);
   } catch (error) {
+    console.log(error);
     next(createHttpError(500, error as Error));
   }
 });
@@ -104,24 +116,28 @@ orderRoute.delete(
         async (I: any) =>
           await ItemsSchema.findByIdAndUpdate(I.item._id, {
             $inc: { quantity: I.qty },
-          })
+          }),
       );
       // Update user orders
       await UserSchema.findByIdAndUpdate(order.customerId, {
         $pull: { "shopping.orders": req.params.orderId },
       });
       // update creator orders
-      const seller = await UserSchema.findById(order.sellerId);
-      await CreatorSchema.findByIdAndUpdate(seller!.creator, {
-        $pull: { "shop.orders": req.params.orderId },
-      });
+      await Promise.all(
+        order.items.map(async (Item: any) => {
+          const seller = await UserSchema.findById(Item.item.sellerId);
+          await CreatorSchema.findByIdAndUpdate(seller!.creator, {
+            $pull: { "shop.orders": req.params.orderId },
+          });
+        }),
+      );
       await OrderSchema.findByIdAndDelete(req.params.orderId);
       // =>
       res.status(203).send({ message: "Order canceled!" });
     } catch (error) {
       next(createHttpError(500, error as Error));
     }
-  }
+  },
 );
 // PAYMENTS
 orderRoute.put(
@@ -133,46 +149,73 @@ orderRoute.put(
       const order = await OrderSchema.findByIdAndUpdate(
         req.params.orderId,
         { paid: req.body.paid },
-        { new: true }
+        { new: true },
       );
       res.send(order);
     } catch (error) {
       next(createHttpError(500, error as Error));
     }
-  }
+  },
 );
-orderRoute.post(
-  "/checkout-session/:orderId",
+orderRoute.get(
+  "/sessionIdCheck/:orderId",
   authJWT,
   async (req: any, res, next) => {
     try {
-      const order = await OrderSchema.findById(req.params.orderId);
-      if (req.user._id.toString() !== order.customerId.toString()) {
-        next(createHttpError(400, "You cannot purchase this order!"));
+      const session = await stripe.checkout.sessions.retrieve(
+        req.query.session_id,
+      );
+      //
+      // console.log(session);
+      if (session.status === "complete" && session.payment_status === "paid") {
+        const order = await OrderSchema.findByIdAndUpdate(
+          req.params.orderId,
+          { paid: true },
+          { new: true },
+        );
+        res.send(order);
       } else {
-        const session = await stripe.checkout.sessions.create({
-          payment_method_types: ["card"],
-          mode: "payment",
-          line_items: order.items.map((I: any) => {
-            return {
-              price_data: {
-                currency: "gbp",
-                product_data: {
-                  name: I.item.title,
-                },
-                unit_amount: I.item.price * 100,
-              },
-              quantity: I.qty,
-            };
-          }),
-          success_url: `${process.env.CLIENT_URL}/success/${req.params.orderId}`,
-          cancel_url: `${process.env.CLIENT_URL}/cancel`,
-        });
-        res.send({ url: session.url });
+        next(createHttpError(400, "Order not paid or false credentials!"));
       }
+      //
     } catch (error) {
       next(createHttpError(500, error as Error));
     }
-  }
+  },
+);
+orderRoute.get(
+  "/checkout-session/:orderId",
+  // authJWT,
+  async (req: any, res, next) => {
+    try {
+      const order = await OrderSchema.findById(req.params.orderId);
+      // if (req.user._id.toString() !== order.customerId.toString()) {
+      //   next(createHttpError(400, "You cannot purchase this order!"));
+      // } else {
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        mode: "payment",
+        line_items: order.items.map((I: any) => {
+          return {
+            price_data: {
+              currency: "gbp",
+              product_data: {
+                name: I.item.title,
+              },
+              unit_amount: I.item.price * 100,
+            },
+            quantity: I.qty,
+          };
+        }),
+        success_url: `${process.env.CLIENT_URL}/success/${req.params.orderId}?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.CLIENT_URL}/cancel`,
+      });
+      // res.send({ url: session.url });
+      res.redirect(`${session.url}`);
+      // }
+    } catch (error) {
+      next(createHttpError(500, error as Error));
+    }
+  },
 );
 export default orderRoute;

@@ -36,7 +36,7 @@ orderRoute.get("/", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, 
         next((0, http_errors_1.default)(500, error));
     }
 }));
-orderRoute.get("/:orderId", tokenCheck_1.authJWT, 
+orderRoute.get("/one:orderId", tokenCheck_1.authJWT, 
 // creatorAuth,
 (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -73,21 +73,33 @@ orderRoute.post("/createOrder", tokenCheck_1.authJWT, (req, res, next) => __awai
         const newOrder = new schema_4.default(Object.assign(Object.assign({}, req.body), { customerId: req.user._id }));
         yield newOrder.save();
         // Update items quantity in store
-        req.body.items.map((I) => __awaiter(void 0, void 0, void 0, function* () {
+        yield Promise.all(req.body.items.map((I) => __awaiter(void 0, void 0, void 0, function* () {
             return yield schema_2.ItemsSchema.findByIdAndUpdate(I.item._id, {
                 $inc: { quantity: -I.qty },
             });
-        }));
-        // user update
-        const myUser = yield schema_3.default.findByIdAndUpdate(req.user._id, {
+        })));
+        // Customer user update
+        yield schema_3.default.findByIdAndUpdate(req.user._id, {
             $push: { "shopping.orders": newOrder._id },
-        }, { new: true });
-        //
-        const sellerUser = yield schema_3.default.findById(req.body.sellerId);
-        const sellerCreator = yield schema_1.default.findByIdAndUpdate(sellerUser.creator, { $push: { "shop.orders": newOrder._id } }, { new: true });
+        });
+        // Update Creator
+        yield Promise.all(req.body.items.map((Item) => __awaiter(void 0, void 0, void 0, function* () {
+            var _a;
+            const sellerUser = yield schema_3.default.findById(Item.item.sellerId);
+            const sellerCreator = yield schema_1.default.findById((_a = sellerUser.creator) === null || _a === void 0 ? void 0 : _a.toString());
+            const checkAlready = sellerCreator.shop.orders.some((O) => O.toString() !== newOrder._id.toString());
+            if (checkAlready) {
+                sellerCreator.shop.orders.push(newOrder._id);
+                // console.log(sellerCreator.shop.orders);
+                yield sellerCreator.save();
+            }
+        })));
+        // res.setHeader("Access-Control-Allow-Origin", "http://localhost:3003");
         res.status(201).send(newOrder);
+        // res.redirect(`/order/checkout-session/${newOrder._id}`);
     }
     catch (error) {
+        console.log(error);
         next((0, http_errors_1.default)(500, error));
     }
 }));
@@ -104,10 +116,12 @@ orderRoute.delete("/cancelorder/:orderId", tokenCheck_1.authJWT, (req, res, next
             $pull: { "shopping.orders": req.params.orderId },
         });
         // update creator orders
-        const seller = yield schema_3.default.findById(order.sellerId);
-        yield schema_1.default.findByIdAndUpdate(seller.creator, {
-            $pull: { "shop.orders": req.params.orderId },
-        });
+        yield Promise.all(order.items.map((Item) => __awaiter(void 0, void 0, void 0, function* () {
+            const seller = yield schema_3.default.findById(Item.item.sellerId);
+            yield schema_1.default.findByIdAndUpdate(seller.creator, {
+                $pull: { "shop.orders": req.params.orderId },
+            });
+        })));
         yield schema_4.default.findByIdAndDelete(req.params.orderId);
         // =>
         res.status(203).send({ message: "Order canceled!" });
@@ -126,33 +140,53 @@ orderRoute.put("/submitpay/:orderId", tokenCheck_1.authJWT, creator_1.creatorAut
         next((0, http_errors_1.default)(500, error));
     }
 }));
-orderRoute.post("/checkout-session/:orderId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+orderRoute.get("/sessionIdCheck/:orderId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const order = yield schema_4.default.findById(req.params.orderId);
-        if (req.user._id.toString() !== order.customerId.toString()) {
-            next((0, http_errors_1.default)(400, "You cannot purchase this order!"));
+        const session = yield stripe.checkout.sessions.retrieve(req.query.session_id);
+        //
+        // console.log(session);
+        if (session.status === "complete" && session.payment_status === "paid") {
+            const order = yield schema_4.default.findByIdAndUpdate(req.params.orderId, { paid: true }, { new: true });
+            res.send(order);
         }
         else {
-            const session = yield stripe.checkout.sessions.create({
-                payment_method_types: ["card"],
-                mode: "payment",
-                line_items: order.items.map((I) => {
-                    return {
-                        price_data: {
-                            currency: "gbp",
-                            product_data: {
-                                name: I.item.title,
-                            },
-                            unit_amount: I.item.price * 100,
-                        },
-                        quantity: I.qty,
-                    };
-                }),
-                success_url: `${process.env.CLIENT_URL}/success/${req.params.orderId}`,
-                cancel_url: `${process.env.CLIENT_URL}/cancel`,
-            });
-            res.send({ url: session.url });
+            next((0, http_errors_1.default)(400, "Order not paid or false credentials!"));
         }
+        //
+    }
+    catch (error) {
+        next((0, http_errors_1.default)(500, error));
+    }
+}));
+orderRoute.get("/checkout-session/:orderId", 
+// authJWT,
+(req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const order = yield schema_4.default.findById(req.params.orderId);
+        // if (req.user._id.toString() !== order.customerId.toString()) {
+        //   next(createHttpError(400, "You cannot purchase this order!"));
+        // } else {
+        const session = yield stripe.checkout.sessions.create({
+            payment_method_types: ["card"],
+            mode: "payment",
+            line_items: order.items.map((I) => {
+                return {
+                    price_data: {
+                        currency: "gbp",
+                        product_data: {
+                            name: I.item.title,
+                        },
+                        unit_amount: I.item.price * 100,
+                    },
+                    quantity: I.qty,
+                };
+            }),
+            success_url: `${process.env.CLIENT_URL}/success/${req.params.orderId}?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${process.env.CLIENT_URL}/cancel`,
+        });
+        // res.send({ url: session.url });
+        res.redirect(`${session.url}`);
+        // }
     }
     catch (error) {
         next((0, http_errors_1.default)(500, error));

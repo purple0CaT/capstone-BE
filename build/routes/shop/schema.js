@@ -14,11 +14,13 @@ const Items = new Schema({
         required: false,
         default: "https://www.bevi.com/static/files/0/ecommerce-default-product.png",
     },
+    sellerId: { type: String, required: true },
     title: { type: String },
-    descrition: { type: String, required: true },
+    imgRatio: { type: String },
+    completed: { type: Boolean, default: "false" },
+    description: { type: String, required: true },
     price: { type: Number, required: true },
     quantity: { type: Number, required: true },
-    seller: { Type: String, required: false },
     type: { type: String, enum: ["default", "user"], default: "default" },
 });
 exports.ItemsSchema = model("Item", Items);

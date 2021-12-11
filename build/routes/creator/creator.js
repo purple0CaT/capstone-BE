@@ -55,16 +55,18 @@ creatorRoute.post("/beCreator", tokenCheck_1.authJWT, (req, res, next) => __awai
             const newItem1 = new schema_1.ItemsSchema({
                 title: "Landscape printed picture",
                 price: 10,
-                descrition: "Landscape printed picture of selected post with ratio: 16:9",
-                quantity: 10,
-                seller: req.user._id,
+                description: "Landscape printed picture of selected post with ratio: 16:9",
+                quantity: 99,
+                sellerId: req.user._id,
+                imgRatio: "16/9",
             });
             const newItem2 = new schema_1.ItemsSchema({
                 title: "Portret printed picture",
                 price: 10,
-                descrition: "Portret printed picture of selected post with ratio: 3:4",
-                quantity: 10,
-                seller: req.user._id,
+                description: "Portret printed picture of selected post with ratio: 3:4",
+                quantity: 99,
+                sellerId: req.user._id,
+                imgRatio: "3/4",
             });
             yield newItem1.save();
             yield newItem2.save();
