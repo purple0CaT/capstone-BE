@@ -6,12 +6,12 @@ import CreatorSchema from "./../creator/schema";
 export const checkFreeDays = async (req: any) => {
   try {
     const creator = await CreatorSchema.findById(req.params.creatorId);
-    const checkAppoint = creator!.booking.availability.some(
-      (A) =>
-        A.start <= new Date(req.body.appointmentDate) &&
-        A.end >= new Date(req.body.appointmentDate) &&
-        A.start <= new Date(req.body.appointmentEnd) &&
-        A.end >= new Date(req.body.appointmentEnd),
+    const checkAvailability = creator!.booking.availability.some(
+      (Av) =>
+        Av.start <= new Date(req.body.appointmentDate) &&
+        Av.end >= new Date(req.body.appointmentDate) &&
+        Av.start <= new Date(req.body.appointmentEnd) &&
+        Av.end >= new Date(req.body.appointmentEnd),
     );
     //============== Availability Checks
     const bookingsData = await Promise.all(
@@ -26,7 +26,7 @@ export const checkFreeDays = async (req: any) => {
           new Date(req.body.appointmentDate),
     );
     // ===
-    return { checkAppoint, checkBookings };
+    return { checkAvailability, checkBookings };
   } catch (error) {
     throw createHttpError(500, error as Error);
   }

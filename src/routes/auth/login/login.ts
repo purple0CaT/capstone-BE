@@ -32,8 +32,10 @@ loginRoute.get(
   passport.authenticate("google"),
   async (req: any, res, next) => {
     try {
-      res.send({ user: req.user.user, tokens: req.user.tokens });
-      res.redirect(`${process.env.URL}`);
+      // res.send({ user: req.user.user, tokens: req.user.tokens });
+      res.redirect(
+        `${process.env.CLIENT_URL}/googlelog?accessToken=${req.user.tokens.accessToken}&refToken=${req.user.tokens.refreshToken}`,
+      );
     } catch (error) {
       next(createHttpError(500, error as Error));
     }

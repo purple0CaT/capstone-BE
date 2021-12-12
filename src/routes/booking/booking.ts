@@ -1,17 +1,11 @@
 import express from "express";
 import createHttpError from "http-errors";
 import { authJWT } from "../../middlewares/authorization/tokenCheck";
-import BookingSchema from "./schema";
-import CreatorSchema from "./../creator/schema";
 import { creatorAuth } from "../../middlewares/creator/creator";
-import UserSchema from "../users/schema";
-import {
-  checkAvailability,
-  checkEmptyAvail,
-  checkFreeDays,
-  clearAppointments,
-} from "./utility";
-import { CreatorType } from "../../types/creator";
+import CreatorSchema from "./../creator/schema";
+import BookingSchema from "./schema";
+import { checkAvailability, checkEmptyAvail, checkFreeDays } from "./utility";
+import UserSchema from "./../users/schema";
 //
 const bookingRoute = express.Router();
 //
@@ -30,15 +24,14 @@ bookingRoute.post(
   authJWT,
   async (req: any, res, next) => {
     try {
-      const { checkAppoint, checkBookings } = await checkFreeDays(req);
-      if (checkAppoint && !checkBookings) {
+      const { checkAvailability, checkBookings } = await checkFreeDays(req);
+      if (checkAvailability) {
         //
         const newAppointment = new BookingSchema({
           ...req.body,
           user: req.user._id,
         });
         await newAppointment.save();
-        //
         const user = await UserSchema.findByIdAndUpdate(req.user._id, {
           $push: { booking: newAppointment._id },
         });

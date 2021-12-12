@@ -16,6 +16,7 @@ const passport_1 = __importDefault(require("passport"));
 const passport_google_oauth20_1 = require("passport-google-oauth20");
 const schema_1 = __importDefault(require("../../users/schema"));
 const token_1 = require("../tokens/token");
+const schema_2 = __importDefault(require("../../followers/schema"));
 process.env.TS_NODE_DEV && require("dotenv").config();
 const googleStrategy = new passport_google_oauth20_1.Strategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
@@ -35,14 +36,24 @@ const googleStrategy = new passport_google_oauth20_1.Strategy({
             const newUser = {
                 firstname: (_a = profile.name) === null || _a === void 0 ? void 0 : _a.givenName,
                 lastname: (_b = profile.name) === null || _b === void 0 ? void 0 : _b.familyName,
+                nickname: "test",
                 email: profile.emails[0].value,
                 googleId: profile.id,
                 avatar: profile.photos[0].value,
                 refreshToken: "",
+                followers: "",
             };
             const createdUser = new schema_1.default(newUser);
+            //
+            const UserFollowers = new schema_2.default({
+                youFollow: [],
+                followers: [],
+            });
+            yield UserFollowers.save();
+            //
             const tokens = yield (0, token_1.generateJWT)(createdUser);
             createdUser.refreshToken = tokens.refreshToken;
+            createdUser.followers = UserFollowers._id;
             yield createdUser.save();
             done(null, { user: createdUser, tokens });
         }

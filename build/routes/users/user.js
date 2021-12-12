@@ -110,7 +110,10 @@ userRoute.put("/background", tokenCheck_1.authJWT, (0, multer_1.default)({ stora
 }));
 userRoute.get("/single/:userId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = yield schema_1.default.findById(req.params.userId).populate("shopping.orders");
+        const user = yield schema_1.default.findById(req.params.userId).populate([
+            "shopping.orders",
+            "booking",
+        ]);
         const followers = yield schema_2.default.findById(user.followers).populate([
             "followers",
             "youFollow",

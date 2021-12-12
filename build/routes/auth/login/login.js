@@ -40,8 +40,8 @@ loginRoute.post("/", (req, res, next) => __awaiter(void 0, void 0, void 0, funct
 loginRoute.get("/google", passport_1.default.authenticate("google", { scope: ["profile", "email"] }));
 loginRoute.get("/googleRed", passport_1.default.authenticate("google"), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        res.send({ user: req.user.user, tokens: req.user.tokens });
-        res.redirect(`${process.env.URL}`);
+        // res.send({ user: req.user.user, tokens: req.user.tokens });
+        res.redirect(`${process.env.CLIENT_URL}/googlelog?accessToken=${req.user.tokens.accessToken}&refToken=${req.user.tokens.refreshToken}`);
     }
     catch (error) {
         next((0, http_errors_1.default)(500, error));

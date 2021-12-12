@@ -15,11 +15,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const http_errors_1 = __importDefault(require("http-errors"));
 const tokenCheck_1 = require("../../middlewares/authorization/tokenCheck");
-const schema_1 = __importDefault(require("./schema"));
-const schema_2 = __importDefault(require("./../creator/schema"));
 const creator_1 = require("../../middlewares/creator/creator");
-const schema_3 = __importDefault(require("../users/schema"));
+const schema_1 = __importDefault(require("./../creator/schema"));
+const schema_2 = __importDefault(require("./schema"));
 const utility_1 = require("./utility");
+const schema_3 = __importDefault(require("./../users/schema"));
 //
 const bookingRoute = express_1.default.Router();
 //
@@ -35,17 +35,16 @@ const bookingRoute = express_1.default.Router();
 // });
 bookingRoute.post("/createAppoint/:creatorId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { checkAppoint, checkBookings } = yield (0, utility_1.checkFreeDays)(req);
-        if (checkAppoint && !checkBookings) {
+        const { checkAvailability, checkBookings } = yield (0, utility_1.checkFreeDays)(req);
+        if (checkAvailability) {
             //
-            const newAppointment = new schema_1.default(Object.assign(Object.assign({}, req.body), { user: req.user._id }));
+            const newAppointment = new schema_2.default(Object.assign(Object.assign({}, req.body), { user: req.user._id }));
             yield newAppointment.save();
-            //
             const user = yield schema_3.default.findByIdAndUpdate(req.user._id, {
                 $push: { booking: newAppointment._id },
             });
             //
-            const creator = yield schema_2.default.findByIdAndUpdate(req.params.creatorId, { $push: { "booking.appointments": newAppointment._id } }, { new: true });
+            const creator = yield schema_1.default.findByIdAndUpdate(req.params.creatorId, { $push: { "booking.appointments": newAppointment._id } }, { new: true });
             res.send({ creator, newAppointment });
         }
         else {
@@ -59,7 +58,7 @@ bookingRoute.post("/createAppoint/:creatorId", tokenCheck_1.authJWT, (req, res, 
 }));
 bookingRoute.get("/appointment/:bookingId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const specific = yield schema_1.default.findById(req.params.bookingId);
+        const specific = yield schema_2.default.findById(req.params.bookingId);
         res.send(specific);
     }
     catch (error) {
@@ -68,8 +67,8 @@ bookingRoute.get("/appointment/:bookingId", tokenCheck_1.authJWT, (req, res, nex
 }));
 bookingRoute.get("/freeappointments/:creatorId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const creator = yield schema_2.default.findById(req.params.creatorId);
-        const allApp = yield Promise.all(creator.booking.appointments.map((A) => __awaiter(void 0, void 0, void 0, function* () { return yield schema_1.default.findById(A); })));
+        const creator = yield schema_1.default.findById(req.params.creatorId);
+        const allApp = yield Promise.all(creator.booking.appointments.map((A) => __awaiter(void 0, void 0, void 0, function* () { return yield schema_2.default.findById(A); })));
         const availability = creator.booking.availability;
         const checkEmptyAvailability = (0, utility_1.checkEmptyAvail)(allApp, availability);
         // console.log(availability);
@@ -86,7 +85,7 @@ bookingRoute.post("/setavailability", tokenCheck_1.authJWT, creator_1.creatorAut
         const checkAvail = yield (0, utility_1.checkAvailability)(req);
         // clearAppointments(req);
         if (checkAvail) {
-            const creator = yield schema_2.default.findByIdAndUpdate(req.user.creator, {
+            const creator = yield schema_1.default.findByIdAndUpdate(req.user.creator, {
                 $push: {
                     "booking.availability": req.body,
                 },

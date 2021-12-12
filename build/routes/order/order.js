@@ -182,7 +182,7 @@ orderRoute.get("/checkout-session/:orderId",
                 };
             }),
             success_url: `${process.env.CLIENT_URL}/success/${req.params.orderId}?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${process.env.CLIENT_URL}/cancel`,
+            cancel_url: `${process.env.CLIENT_URL}/order`,
         });
         // res.send({ url: session.url });
         res.redirect(`${session.url}`);

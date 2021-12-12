@@ -20,17 +20,17 @@ const schema_2 = __importDefault(require("./../creator/schema"));
 const checkFreeDays = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const creator = yield schema_2.default.findById(req.params.creatorId);
-        const checkAppoint = creator.booking.availability.some((A) => A.start <= new Date(req.body.appointmentDate) &&
-            A.end >= new Date(req.body.appointmentDate) &&
-            A.start <= new Date(req.body.appointmentEnd) &&
-            A.end >= new Date(req.body.appointmentEnd));
+        const checkAvailability = creator.booking.availability.some((Av) => Av.start <= new Date(req.body.appointmentDate) &&
+            Av.end >= new Date(req.body.appointmentDate) &&
+            Av.start <= new Date(req.body.appointmentEnd) &&
+            Av.end >= new Date(req.body.appointmentEnd));
         //============== Availability Checks
         const bookingsData = yield Promise.all(creator.booking.appointments.map((AP) => __awaiter(void 0, void 0, void 0, function* () { return yield schema_1.default.findById(AP); })));
         const checkBookings = bookingsData.some((d) => d.appointmentDate <= new Date(req.body.appointmentDate) &&
             d.appointmentDate.setHours(d.appointmentDate.getHours() + 1) >=
                 new Date(req.body.appointmentDate));
         // ===
-        return { checkAppoint, checkBookings };
+        return { checkAvailability, checkBookings };
     }
     catch (error) {
         throw (0, http_errors_1.default)(500, error);
