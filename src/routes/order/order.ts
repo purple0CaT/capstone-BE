@@ -61,6 +61,27 @@ orderRoute.put(
     }
   },
 );
+orderRoute.put(
+  "/completeItem/:orderId/:itemId",
+  authJWT,
+  creatorAuth,
+  async (req: Request, res, next) => {
+    try {
+      const order = await OrderSchema.findById(req.params.orderId);
+      const index = order.items.findIndex(
+        (I: any) => I.item._id === req.params.itemId,
+      );
+      order.items.set(index, {
+        ...order.items[index],
+        item: { ...order.items[index].item, completed: true },
+      });
+      await order.save();
+      res.send(order);
+    } catch (error) {
+      next(createHttpError(500, error as Error));
+    }
+  },
+);
 // ============= ORDER create|cancel
 orderRoute.post("/createOrder", authJWT, async (req: any, res, next) => {
   try {
@@ -76,31 +97,24 @@ orderRoute.post("/createOrder", authJWT, async (req: any, res, next) => {
           }),
       ),
     );
-    // Customer user update
+    // Customer  update
     await UserSchema.findByIdAndUpdate(req.user._id, {
       $push: { "shopping.orders": newOrder._id },
     });
     // Update Creator
-    await Promise.all(
-      req.body.items.map(async (Item: any) => {
-        const sellerUser = await UserSchema.findById(Item.item.sellerId);
-        const sellerCreator: any = await CreatorSchema.findById(
-          sellerUser!.creator?.toString(),
-        );
-        const checkAlready = sellerCreator.shop.orders.some(
-          (O: any) => O.toString() !== newOrder._id.toString(),
-        );
-        if (checkAlready) {
-          sellerCreator.shop.orders.push(newOrder._id);
-          // console.log(sellerCreator.shop.orders);
-          await sellerCreator.save();
-        }
-      }),
+    const arrSellers = newOrder.items.map((Item: any) =>
+      Item.item.sellerId.toString(),
     );
-    // res.setHeader("Access-Control-Allow-Origin", "http://localhost:3003");
-
-    res.status(201).send(newOrder);
-    // res.redirect(`/order/checkout-session/${newOrder._id}`);
+    const dupl = [...new Set(arrSellers)];
+    await dupl.map(async (Item: any) => {
+      const sellerUser: any = await UserSchema.findById(Item);
+      await CreatorSchema.findByIdAndUpdate(sellerUser.creator, {
+        $push: { "shop.orders": newOrder._id },
+      });
+    }),
+      // test
+      //
+      res.status(201).send(newOrder);
   } catch (error) {
     console.log(error);
     next(createHttpError(500, error as Error));
@@ -166,7 +180,6 @@ orderRoute.get(
         req.query.session_id,
       );
       //
-      // console.log(session);
       if (session.status === "complete" && session.payment_status === "paid") {
         const order = await OrderSchema.findByIdAndUpdate(
           req.params.orderId,

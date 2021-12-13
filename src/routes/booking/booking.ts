@@ -59,6 +59,23 @@ bookingRoute.get("/appointment/:bookingId", authJWT, async (req, res, next) => {
     next(createHttpError(500, error as Error));
   }
 });
+bookingRoute.put(
+  "/appointmentConfirm/:bookingId",
+  authJWT,
+  creatorAuth,
+  async (req, res, next) => {
+    try {
+      const specific = await BookingSchema.findByIdAndUpdate(
+        req.params.bookingId,
+        { confirmed: true },
+        { new: true },
+      );
+      res.send(specific);
+    } catch (error) {
+      next(createHttpError(500, error as Error));
+    }
+  },
+);
 bookingRoute.get(
   "/freeappointments/:creatorId",
   authJWT,

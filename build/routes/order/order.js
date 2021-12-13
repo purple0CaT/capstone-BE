@@ -66,6 +66,18 @@ orderRoute.put("/delivery/:orderId", tokenCheck_1.authJWT, creator_1.creatorAuth
         next((0, http_errors_1.default)(500, error));
     }
 }));
+orderRoute.put("/completeItem/:orderId/:itemId", tokenCheck_1.authJWT, creator_1.creatorAuth, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const order = yield schema_4.default.findById(req.params.orderId);
+        const index = order.items.findIndex((I) => I.item._id === req.params.itemId);
+        order.items.set(index, Object.assign(Object.assign({}, order.items[index]), { item: Object.assign(Object.assign({}, order.items[index].item), { completed: true }) }));
+        yield order.save();
+        res.send(order);
+    }
+    catch (error) {
+        next((0, http_errors_1.default)(500, error));
+    }
+}));
 // ============= ORDER create|cancel
 orderRoute.post("/createOrder", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -78,25 +90,22 @@ orderRoute.post("/createOrder", tokenCheck_1.authJWT, (req, res, next) => __awai
                 $inc: { quantity: -I.qty },
             });
         })));
-        // Customer user update
+        // Customer  update
         yield schema_3.default.findByIdAndUpdate(req.user._id, {
             $push: { "shopping.orders": newOrder._id },
         });
         // Update Creator
-        yield Promise.all(req.body.items.map((Item) => __awaiter(void 0, void 0, void 0, function* () {
-            var _a;
-            const sellerUser = yield schema_3.default.findById(Item.item.sellerId);
-            const sellerCreator = yield schema_1.default.findById((_a = sellerUser.creator) === null || _a === void 0 ? void 0 : _a.toString());
-            const checkAlready = sellerCreator.shop.orders.some((O) => O.toString() !== newOrder._id.toString());
-            if (checkAlready) {
-                sellerCreator.shop.orders.push(newOrder._id);
-                // console.log(sellerCreator.shop.orders);
-                yield sellerCreator.save();
-            }
-        })));
-        // res.setHeader("Access-Control-Allow-Origin", "http://localhost:3003");
-        res.status(201).send(newOrder);
-        // res.redirect(`/order/checkout-session/${newOrder._id}`);
+        const arrSellers = newOrder.items.map((Item) => Item.item.sellerId.toString());
+        const dupl = [...new Set(arrSellers)];
+        yield dupl.map((Item) => __awaiter(void 0, void 0, void 0, function* () {
+            const sellerUser = yield schema_3.default.findById(Item);
+            yield schema_1.default.findByIdAndUpdate(sellerUser.creator, {
+                $push: { "shop.orders": newOrder._id },
+            });
+        })),
+            // test
+            //
+            res.status(201).send(newOrder);
     }
     catch (error) {
         console.log(error);
@@ -144,7 +153,6 @@ orderRoute.get("/sessionIdCheck/:orderId", tokenCheck_1.authJWT, (req, res, next
     try {
         const session = yield stripe.checkout.sessions.retrieve(req.query.session_id);
         //
-        // console.log(session);
         if (session.status === "complete" && session.payment_status === "paid") {
             const order = yield schema_4.default.findByIdAndUpdate(req.params.orderId, { paid: true }, { new: true });
             res.send(order);

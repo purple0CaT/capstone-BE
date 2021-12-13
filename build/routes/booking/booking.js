@@ -65,6 +65,15 @@ bookingRoute.get("/appointment/:bookingId", tokenCheck_1.authJWT, (req, res, nex
         next((0, http_errors_1.default)(500, error));
     }
 }));
+bookingRoute.put("/appointmentConfirm/:bookingId", tokenCheck_1.authJWT, creator_1.creatorAuth, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const specific = yield schema_2.default.findByIdAndUpdate(req.params.bookingId, { confirmed: true }, { new: true });
+        res.send(specific);
+    }
+    catch (error) {
+        next((0, http_errors_1.default)(500, error));
+    }
+}));
 bookingRoute.get("/freeappointments/:creatorId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const creator = yield schema_1.default.findById(req.params.creatorId);

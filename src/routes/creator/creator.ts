@@ -27,7 +27,7 @@ creatorRoute.get("/me", authJWT, creatorAuth, async (req: any, res, next) => {
 creatorRoute.get("/single/:creatorId", authJWT, async (req, res, next) => {
   try {
     const creator = await CreatorSchema.findById(req.params.creatorId).populate(
-      ["booking.appointments", "shop.items"],
+      ["booking.appointments", "shop.items", "shop.orders"],
     );
     res.send(creator);
   } catch (error) {
