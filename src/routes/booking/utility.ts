@@ -13,6 +13,9 @@ export const checkFreeDays = async (req: any) => {
         Av.start <= new Date(req.body.appointmentEnd) &&
         Av.end >= new Date(req.body.appointmentEnd),
     );
+    // console.log(creator!.booking.availability[0].end.toLocaleTimeString());
+    // console.log(new Date(req.body.appointmentEnd).toLocaleTimeString());
+    // console.log(creator!.booking.availability[0].end < new Date(req.body.appointmentEnd));
     //============== Availability Checks
     const bookingsData = await Promise.all(
       creator!.booking.appointments.map(

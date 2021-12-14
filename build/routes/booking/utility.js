@@ -24,6 +24,9 @@ const checkFreeDays = (req) => __awaiter(void 0, void 0, void 0, function* () {
             Av.end >= new Date(req.body.appointmentDate) &&
             Av.start <= new Date(req.body.appointmentEnd) &&
             Av.end >= new Date(req.body.appointmentEnd));
+        // console.log(creator!.booking.availability[0].end.toLocaleTimeString());
+        // console.log(new Date(req.body.appointmentEnd).toLocaleTimeString());
+        // console.log(creator!.booking.availability[0].end < new Date(req.body.appointmentEnd));
         //============== Availability Checks
         const bookingsData = yield Promise.all(creator.booking.appointments.map((AP) => __awaiter(void 0, void 0, void 0, function* () { return yield schema_1.default.findById(AP); })));
         const checkBookings = bookingsData.some((d) => d.appointmentDate <= new Date(req.body.appointmentDate) &&
