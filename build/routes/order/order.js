@@ -21,6 +21,7 @@ const schema_2 = require("../shop/schema");
 const schema_3 = __importDefault(require("../users/schema"));
 const schema_4 = __importDefault(require("./schema"));
 const stripe_1 = __importDefault(require("stripe"));
+const admin_1 = require("../../middlewares/Admin/admin");
 //
 const stripe = new stripe_1.default(process.env.STRIPE_SK, {
     apiVersion: "2020-08-27",
@@ -48,9 +49,11 @@ orderRoute.get("/one:orderId", tokenCheck_1.authJWT,
     }
 }));
 // Only DEFAULT items
-orderRoute.get("/adminOrders", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+orderRoute.get("/adminOrders", tokenCheck_1.authJWT, admin_1.adminCheck, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const orders = yield schema_4.default.find({ "items.item.type": "default" });
+        const orders = yield schema_4.default.find({
+            "items.item.type": "default",
+        }).sort("-createdAt");
         res.send(orders);
     }
     catch (error) {
@@ -66,11 +69,11 @@ orderRoute.put("/delivery/:orderId", tokenCheck_1.authJWT, creator_1.creatorAuth
         next((0, http_errors_1.default)(500, error));
     }
 }));
-orderRoute.put("/completeItem/:orderId/:itemId", tokenCheck_1.authJWT, creator_1.creatorAuth, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+orderRoute.put("/completeItemDelivery/:orderId/:itemId", tokenCheck_1.authJWT, creator_1.creatorAuth, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const order = yield schema_4.default.findById(req.params.orderId);
         const index = order.items.findIndex((I) => I.item._id === req.params.itemId);
-        order.items.set(index, Object.assign(Object.assign({}, order.items[index]), { item: Object.assign(Object.assign({}, order.items[index].item), { completed: true }) }));
+        order.items.set(index, Object.assign(Object.assign({}, order.items[index]), { item: Object.assign(Object.assign({}, order.items[index].item), { completed: true, deliveryCode: req.body.deliveryCode }) }));
         yield order.save();
         res.send(order);
     }

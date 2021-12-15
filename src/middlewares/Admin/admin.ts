@@ -1,12 +1,12 @@
 import { NextFunction } from "express";
 import createHttpError from "http-errors";
 
-export const creatorAuth = async (req: any, res: any, next: NextFunction) => {
+export const adminCheck = async (req: any, res: any, next: NextFunction) => {
   try {
-    if (req.user.creator || req.user.type === "admin") {
+    if (req.user.type === "admin") {
       next();
     } else {
-      next(createHttpError(404, "You are not a creator!"));
+      next(createHttpError(404, "You are not allowed!"));
     }
   } catch (error) {
     next(createHttpError(500, error as any));

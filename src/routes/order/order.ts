@@ -7,6 +7,7 @@ import { ItemsSchema } from "../shop/schema";
 import UserSchema from "../users/schema";
 import OrderSchema from "./schema";
 import Stripe from "stripe";
+import { adminCheck } from "../../middlewares/Admin/admin";
 //
 const stripe = new Stripe(process.env.STRIPE_SK!, {
   apiVersion: "2020-08-27",
@@ -36,14 +37,21 @@ orderRoute.get(
   },
 );
 // Only DEFAULT items
-orderRoute.get("/adminOrders", authJWT, async (req: any, res, next) => {
-  try {
-    const orders = await OrderSchema.find({ "items.item.type": "default" });
-    res.send(orders);
-  } catch (error) {
-    next(createHttpError(500, error as Error));
-  }
-});
+orderRoute.get(
+  "/adminOrders",
+  authJWT,
+  adminCheck,
+  async (req: any, res, next) => {
+    try {
+      const orders = await OrderSchema.find({
+        "items.item.type": "default",
+      }).sort("-createdAt");
+      res.send(orders);
+    } catch (error) {
+      next(createHttpError(500, error as Error));
+    }
+  },
+);
 orderRoute.put(
   "/delivery/:orderId",
   authJWT,
@@ -62,7 +70,7 @@ orderRoute.put(
   },
 );
 orderRoute.put(
-  "/completeItem/:orderId/:itemId",
+  "/completeItemDelivery/:orderId/:itemId",
   authJWT,
   creatorAuth,
   async (req: Request, res, next) => {
@@ -73,7 +81,11 @@ orderRoute.put(
       );
       order.items.set(index, {
         ...order.items[index],
-        item: { ...order.items[index].item, completed: true },
+        item: {
+          ...order.items[index].item,
+          completed: true,
+          deliveryCode: req.body.deliveryCode,
+        },
       });
       await order.save();
       res.send(order);

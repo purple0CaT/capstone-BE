@@ -12,19 +12,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.creatorAuth = void 0;
+exports.adminCheck = void 0;
 const http_errors_1 = __importDefault(require("http-errors"));
-const creatorAuth = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+const adminCheck = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        if (req.user.creator || req.user.type === "admin") {
+        if (req.user.type === "admin") {
             next();
         }
         else {
-            next((0, http_errors_1.default)(404, "You are not a creator!"));
+            next((0, http_errors_1.default)(404, "You are not allowed!"));
         }
     }
     catch (error) {
         next((0, http_errors_1.default)(500, error));
     }
 });
-exports.creatorAuth = creatorAuth;
+exports.adminCheck = adminCheck;
