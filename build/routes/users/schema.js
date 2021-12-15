@@ -66,6 +66,7 @@ const UserSchema = new Schema({
     type: { type: String, enum: ["admin", "user"], default: "user" },
     socket: { type: String, required: false },
     followers: { type: Schema.Types.ObjectId, ref: "Follower" },
+    links: [{ title: { type: String }, link: { type: String } }],
 });
 //
 UserSchema.pre("save", function () {

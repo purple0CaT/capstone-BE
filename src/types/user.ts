@@ -25,6 +25,7 @@ export interface UserType {
     orders?: Object | any;
     pendingOrders?: Object;
   };
+  links?: object[];
 }
 export interface UserSchemaType extends Model<UserType> {
   CheckCredentials(email: string, password: string): any;
