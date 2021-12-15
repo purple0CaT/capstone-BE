@@ -192,7 +192,11 @@ orderRoute.get(
         req.query.session_id,
       );
       //
-      if (session.status === "complete" && session.payment_status === "paid") {
+      if (
+        session.status === "complete" &&
+        session.payment_status === "paid" &&
+        session.client_reference_id === req.params.orderId
+      ) {
         const order = await OrderSchema.findByIdAndUpdate(
           req.params.orderId,
           { paid: true },
@@ -220,6 +224,7 @@ orderRoute.get(
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         mode: "payment",
+        client_reference_id: order._id.toString(),
         line_items: order.items.map((I: any) => {
           return {
             price_data: {

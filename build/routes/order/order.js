@@ -156,7 +156,9 @@ orderRoute.get("/sessionIdCheck/:orderId", tokenCheck_1.authJWT, (req, res, next
     try {
         const session = yield stripe.checkout.sessions.retrieve(req.query.session_id);
         //
-        if (session.status === "complete" && session.payment_status === "paid") {
+        if (session.status === "complete" &&
+            session.payment_status === "paid" &&
+            session.client_reference_id === req.params.orderId) {
             const order = yield schema_4.default.findByIdAndUpdate(req.params.orderId, { paid: true }, { new: true });
             res.send(order);
         }
@@ -180,6 +182,7 @@ orderRoute.get("/checkout-session/:orderId",
         const session = yield stripe.checkout.sessions.create({
             payment_method_types: ["card"],
             mode: "payment",
+            client_reference_id: order._id.toString(),
             line_items: order.items.map((I) => {
                 return {
                     price_data: {
