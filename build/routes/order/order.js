@@ -23,6 +23,7 @@ const schema_4 = __importDefault(require("./schema"));
 const stripe_1 = __importDefault(require("stripe"));
 const admin_1 = require("../../middlewares/Admin/admin");
 //
+//
 const stripe = new stripe_1.default(process.env.STRIPE_SK, {
     apiVersion: "2020-08-27",
 });
@@ -37,7 +38,7 @@ orderRoute.get("/", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, 
         next((0, http_errors_1.default)(500, error));
     }
 }));
-orderRoute.get("/one:orderId", tokenCheck_1.authJWT, 
+orderRoute.get("/one/:orderId", tokenCheck_1.authJWT, 
 // creatorAuth,
 (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -48,7 +49,6 @@ orderRoute.get("/one:orderId", tokenCheck_1.authJWT,
         next((0, http_errors_1.default)(500, error));
     }
 }));
-// Only DEFAULT items
 orderRoute.get("/adminOrders", tokenCheck_1.authJWT, admin_1.adminCheck, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const orders = yield schema_4.default.find({
@@ -142,7 +142,7 @@ orderRoute.delete("/cancelorder/:orderId", tokenCheck_1.authJWT, (req, res, next
         next((0, http_errors_1.default)(500, error));
     }
 }));
-// PAYMENTS
+// ======================  PAYMENTS
 orderRoute.put("/submitpay/:orderId", tokenCheck_1.authJWT, creator_1.creatorAuth, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const order = yield schema_4.default.findByIdAndUpdate(req.params.orderId, { paid: req.body.paid }, { new: true });

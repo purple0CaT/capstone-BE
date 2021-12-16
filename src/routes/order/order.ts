@@ -8,6 +8,8 @@ import UserSchema from "../users/schema";
 import OrderSchema from "./schema";
 import Stripe from "stripe";
 import { adminCheck } from "../../middlewares/Admin/admin";
+import mongoose from "mongoose";
+//
 //
 const stripe = new Stripe(process.env.STRIPE_SK!, {
   apiVersion: "2020-08-27",
@@ -24,7 +26,7 @@ orderRoute.get("/", authJWT, async (req: any, res, next) => {
   }
 });
 orderRoute.get(
-  "/one:orderId",
+  "/one/:orderId",
   authJWT,
   // creatorAuth,
   async (req: any, res, next) => {
@@ -36,7 +38,6 @@ orderRoute.get(
     }
   },
 );
-// Only DEFAULT items
 orderRoute.get(
   "/adminOrders",
   authJWT,
@@ -165,7 +166,7 @@ orderRoute.delete(
     }
   },
 );
-// PAYMENTS
+// ======================  PAYMENTS
 orderRoute.put(
   "/submitpay/:orderId",
   authJWT,

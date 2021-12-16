@@ -6,6 +6,7 @@ const BookingSchema = new Schema({
   appointmentEnd: { type: Date, required: true, min: new Date() },
   user: { type: Schema.Types.ObjectId, ref: "User", required: true },
   confirmed: { type: Boolean, default: false },
+  rejected: { type: Boolean, default: false },
 });
 
 export default model("Booking", BookingSchema);

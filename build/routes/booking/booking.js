@@ -20,7 +20,9 @@ const schema_1 = __importDefault(require("./../creator/schema"));
 const schema_2 = __importDefault(require("./schema"));
 const utility_1 = require("./utility");
 const schema_3 = __importDefault(require("./../users/schema"));
+const mongoose_1 = __importDefault(require("mongoose"));
 //
+const ObjectId = mongoose_1.default.Types.ObjectId;
 const bookingRoute = express_1.default.Router();
 //
 // bookingRoute.get("/creator/:creatorId", authJWT, async (req, res, next) => {
@@ -104,6 +106,23 @@ bookingRoute.post("/setavailability", tokenCheck_1.authJWT, creator_1.creatorAut
         else {
             next((0, http_errors_1.default)(400, "Availability already set for this time, pick another one!"));
         }
+    }
+    catch (error) {
+        next((0, http_errors_1.default)(500, error));
+    }
+}));
+bookingRoute.put("/cancelAvailability/:availabId", tokenCheck_1.authJWT, creator_1.creatorAuth, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    // console.log(req.params.availabId);
+    try {
+        const crt = yield schema_1.default.findById(req.user.creator);
+        const check = crt.booking.availability.filter((AV) => AV._id.toString() === req.params.availabId);
+        // console.log(check);
+        yield schema_1.default.findByIdAndUpdate(req.user.creator, {
+            $pull: {
+                "booking.availability": { _id: new ObjectId(req.params.availabId) },
+            },
+        });
+        res.send();
     }
     catch (error) {
         next((0, http_errors_1.default)(500, error));

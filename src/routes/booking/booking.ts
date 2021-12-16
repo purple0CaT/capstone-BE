@@ -6,7 +6,9 @@ import CreatorSchema from "./../creator/schema";
 import BookingSchema from "./schema";
 import { checkAvailability, checkEmptyAvail, checkFreeDays } from "./utility";
 import UserSchema from "./../users/schema";
+import mongoose from "mongoose";
 //
+const ObjectId = mongoose.Types.ObjectId;
 const bookingRoute = express.Router();
 //
 // bookingRoute.get("/creator/:creatorId", authJWT, async (req, res, next) => {
@@ -125,6 +127,29 @@ bookingRoute.post(
           ),
         );
       }
+    } catch (error) {
+      next(createHttpError(500, error as Error));
+    }
+  },
+);
+bookingRoute.put(
+  "/cancelAvailability/:availabId",
+  authJWT,
+  creatorAuth,
+  async (req: any, res, next) => {
+    // console.log(req.params.availabId);
+    try {
+      const crt: any = await CreatorSchema.findById(req.user.creator);
+      const check = crt.booking.availability.filter(
+        (AV: any) => AV._id.toString() === req.params.availabId,
+      );
+      // console.log(check);
+      await CreatorSchema.findByIdAndUpdate(req.user.creator, {
+        $pull: {
+          "booking.availability": { _id: new ObjectId(req.params.availabId) },
+        },
+      });
+      res.send();
     } catch (error) {
       next(createHttpError(500, error as Error));
     }

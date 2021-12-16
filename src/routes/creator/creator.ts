@@ -80,9 +80,7 @@ creatorRoute.delete(
   creatorAuth,
   async (req: any, res, next) => {
     try {
-      const creator: CreatorType | any = await CreatorSchema.findById(
-        req.user.creator,
-      );
+      const creator: any = await CreatorSchema.findById(req.user.creator);
       if (creator) {
         creator.shop.items.map(
           async (I: any) => await ItemsSchema.findByIdAndDelete(I._id),
