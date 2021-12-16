@@ -23,7 +23,7 @@ const googleStrategy = new Strategy(
         const newUser = {
           firstname: profile.name?.givenName,
           lastname: profile.name?.familyName,
-          nickname: "test",
+          nickname: `${profile.name?.givenName.toLowerCase()}.${profile.name?.familyName.toLowerCase()}`,
           email: profile.emails![0].value,
           googleId: profile.id,
           avatar: profile.photos![0].value,
