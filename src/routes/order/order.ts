@@ -232,10 +232,12 @@ orderRoute.get(
               currency: "gbp",
               product_data: {
                 name: I.item.title,
+                images: [I.item.image],
               },
               unit_amount: I.item.price * 100,
             },
             quantity: I.qty,
+            description: I.item.description,
           };
         }),
         success_url: `${process.env.CLIENT_URL}/success/${req.params.orderId}?session_id={CHECKOUT_SESSION_ID}`,
