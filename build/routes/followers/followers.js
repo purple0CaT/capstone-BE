@@ -28,63 +28,16 @@ followRoute.post("/:userId", tokenCheck_1.authJWT, (req, res, next) => __awaiter
         //
         const myUser = yield schema_1.default.findById(req.user._id.toString());
         const followedUser = yield schema_1.default.findById(req.params.userId);
-        // console.log(myUser!.followers);
-        // if (myUser!.followers) {
         yield schema_2.default.findByIdAndUpdate(myUser.followers.toString(), {
             $push: {
-                youFollow: {
-                    _id: followedUser._id,
-                    firstname: followedUser.firstname,
-                    lastname: followedUser.lastname,
-                    avatar: followedUser.avatar,
-                },
+                youFollow: followedUser._id,
             },
         });
-        // } else {
-        //   const myFollower = new FollowSchema({
-        //     youFollow: [
-        //       {
-        //         _id: followedUser._id,
-        //         firstname: followedUser.firstname,
-        //         lastname: followedUser.lastname,
-        //         avatar: followedUser.avatar,
-        //       },
-        //     ],
-        //     followers: [],
-        //   });
-        //   await myFollower.save();
-        //   myUser!.followers = myFollower._id.toString();
-        //   await myUser!.save();
-        // }
-        //   followed user logic update
-        // if (followedUser.followers) {
         yield schema_2.default.findByIdAndUpdate(followedUser.followers.toString(), {
             $push: {
-                followers: {
-                    _id: req.user._id,
-                    firstname: req.user.firstname,
-                    lastname: req.user.lastname,
-                    avatar: req.user.avatar,
-                },
+                followers: req.user._id,
             },
         });
-        // } else {
-        //   const newUserFollowers = new FollowSchema({
-        //     followers: [
-        //       {
-        //         _id: req.user._id,
-        //         firstname: req.user.firstname,
-        //         lastname: req.user.lastname,
-        //         avatar: req.user.avatar,
-        //       },
-        //     ],
-        //     youFollow: [],
-        //   });
-        //   await newUserFollowers.save();
-        //   followedUser!.followers = newUserFollowers._id;
-        //   await followedUser!.save();
-        // }
-        //   End of followed User logic
         res.send(myUser);
     }
     catch (error) {
@@ -95,11 +48,10 @@ followRoute.post("/:userId", tokenCheck_1.authJWT, (req, res, next) => __awaiter
 // Unfollow smbdy
 followRoute.delete("/:userId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const myFollowers = yield schema_2.default.findByIdAndUpdate(req.user.followers, { $pull: { youFollow: { _id: new ObjectId(req.params.userId) } } }, { new: true });
-        // console.log(myFollowers);
+        const myFollowers = yield schema_2.default.findByIdAndUpdate(req.user.followers, { $pull: { youFollow: new ObjectId(req.params.userId) } }, { new: true });
         const followedUser = yield schema_1.default.findById(req.params.userId);
         yield schema_2.default.findByIdAndUpdate(followedUser === null || followedUser === void 0 ? void 0 : followedUser.followers, {
-            $pull: { followers: { _id: req.user._id } },
+            $pull: { followers: req.user._id },
         });
         res.send(myFollowers);
     }

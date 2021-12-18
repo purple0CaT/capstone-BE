@@ -6,20 +6,20 @@ import PostSchema from "../schema";
 //
 const commentRoute = express.Router();
 //
-commentRoute.get("/", authJWT, async (req: any, res, next) => {
-  try {
-  } catch (error) {
-    next(createHttpError(500, error as Error));
-  }
-});
-commentRoute.get("/:commentId", authJWT, async (req: any, res, next) => {
-  try {
-    const comment = await CommentSchema.findById(req.params.commentId);
-    res.send(comment);
-  } catch (error) {
-    next(createHttpError(500, error as Error));
-  }
-});
+// commentRoute.get("/", authJWT, async (req: any, res, next) => {
+//   try {
+//   } catch (error) {
+//     next(createHttpError(500, error as Error));
+//   }
+// });
+// commentRoute.get("/:commentId", authJWT, async (req: any, res, next) => {
+//   try {
+//     const comment = await CommentSchema.findById(req.params.commentId);
+//     res.send(comment);
+//   } catch (error) {
+//     next(createHttpError(500, error as Error));
+//   }
+// });
 commentRoute.delete("/:commentId", authJWT, async (req: any, res, next) => {
   try {
     const comment = await CommentSchema.findByIdAndDelete(req.params.commentId);
@@ -32,12 +32,7 @@ commentRoute.post("/add/:postId", authJWT, async (req: any, res, next) => {
   try {
     const comment = new CommentSchema({
       ...req.body,
-      author: {
-        _id: req.user._id,
-        firstname: req.user.firstname,
-        lastname: req.user.lastname,
-        avatar: req.user.avatar,
-      },
+      author: req.user._id,
     });
     await comment.save();
     const post = await PostSchema.findByIdAndUpdate(req.params.postId, {

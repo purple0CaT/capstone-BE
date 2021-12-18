@@ -20,22 +20,20 @@ const schema_2 = __importDefault(require("../schema"));
 //
 const commentRoute = express_1.default.Router();
 //
-commentRoute.get("/", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-    }
-    catch (error) {
-        next((0, http_errors_1.default)(500, error));
-    }
-}));
-commentRoute.get("/:commentId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const comment = yield schema_1.default.findById(req.params.commentId);
-        res.send(comment);
-    }
-    catch (error) {
-        next((0, http_errors_1.default)(500, error));
-    }
-}));
+// commentRoute.get("/", authJWT, async (req: any, res, next) => {
+//   try {
+//   } catch (error) {
+//     next(createHttpError(500, error as Error));
+//   }
+// });
+// commentRoute.get("/:commentId", authJWT, async (req: any, res, next) => {
+//   try {
+//     const comment = await CommentSchema.findById(req.params.commentId);
+//     res.send(comment);
+//   } catch (error) {
+//     next(createHttpError(500, error as Error));
+//   }
+// });
 commentRoute.delete("/:commentId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const comment = yield schema_1.default.findByIdAndDelete(req.params.commentId);
@@ -47,12 +45,7 @@ commentRoute.delete("/:commentId", tokenCheck_1.authJWT, (req, res, next) => __a
 }));
 commentRoute.post("/add/:postId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const comment = new schema_1.default(Object.assign(Object.assign({}, req.body), { author: {
-                _id: req.user._id,
-                firstname: req.user.firstname,
-                lastname: req.user.lastname,
-                avatar: req.user.avatar,
-            } }));
+        const comment = new schema_1.default(Object.assign(Object.assign({}, req.body), { author: req.user._id }));
         yield comment.save();
         const post = yield schema_2.default.findByIdAndUpdate(req.params.postId, {
             $push: { comments: comment._id },

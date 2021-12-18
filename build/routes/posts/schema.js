@@ -9,12 +9,7 @@ const { Schema, model } = mongoose_1.default;
 const PostSchema = new Schema({
     text: { type: String, required: true },
     media: { type: String, required: true },
-    author: {
-        _id: { type: Object },
-        firstname: { type: String },
-        lastname: { type: String },
-        avatar: { type: String },
-    },
+    author: { type: Schema.Types.ObjectId, ref: "User", required: true },
     likes: [{ type: String, required: false }],
     location: { type: String, required: false },
     comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],

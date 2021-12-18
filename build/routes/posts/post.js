@@ -37,7 +37,19 @@ postRoute.get("/", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, v
     try {
         const allPosts = yield schema_1.default.find({})
             .sort("-createdAt")
-            .populate("comments");
+            .populate([
+            {
+                path: "comments",
+                populate: {
+                    path: "author",
+                    select: ["firstname", "lastname", "avatar"],
+                },
+            },
+            {
+                path: "comments.author",
+                select: ["firstname", "lastname", "avatar"],
+            },
+        ]);
         res.send(allPosts);
     }
     catch (error) {
@@ -46,7 +58,19 @@ postRoute.get("/", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, v
 }));
 postRoute.get("/single/:postId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const post = yield schema_1.default.findById(req.params.postId).populate("comments");
+        const post = yield schema_1.default.findById(req.params.postId).populate([
+            {
+                path: "comments",
+                populate: {
+                    path: "author",
+                    select: ["firstname", "lastname", "avatar"],
+                },
+            },
+            {
+                path: "comments.author",
+                select: ["firstname", "lastname", "avatar"],
+            },
+        ]);
         res.send(post);
     }
     catch (error) {
@@ -58,7 +82,19 @@ postRoute.get("/userPosts/:userId", tokenCheck_1.authJWT, (req, res, next) => __
         const post = yield schema_1.default.find({
             "author._id": new ObjectId(req.params.userId),
         })
-            .populate("comments")
+            .populate([
+            {
+                path: "comments",
+                populate: {
+                    path: "author",
+                    select: ["firstname", "lastname", "avatar"],
+                },
+            },
+            {
+                path: "comments.author",
+                select: ["firstname", "lastname", "avatar"],
+            },
+        ])
             .sort("-createdAt");
         res.send(post);
     }
@@ -89,12 +125,7 @@ postRoute.post("/likes/:postId", tokenCheck_1.authJWT, (req, res, next) => __awa
 //
 postRoute.post("/", tokenCheck_1.authJWT, (0, multer_1.default)({ storage: storage }).single("media"), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const newPost = new schema_1.default(Object.assign(Object.assign({}, req.body), { media: req.file.path, author: {
-                _id: req.user._id,
-                firstname: req.user.firstname,
-                lastname: req.user.lastname,
-                avatar: req.user.avatar,
-            } }));
+        const newPost = new schema_1.default(Object.assign(Object.assign({}, req.body), { media: req.file.path, author: req.user._id }));
         yield newPost.save();
         res.send(newPost);
     }

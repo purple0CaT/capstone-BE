@@ -13,20 +13,19 @@ io.use(ioAuthorization as any);
 
 io.on("connection", async (socket: any) => {
   const chats = await ChatSchema.find({
-    "members._id": socket.user._id,
+    members: socket.user._id,
   });
   chats.map((chat) => {
     socket.join(chat._id.toString());
   });
-  // ======================
+  // === Join specific room
+  socket.on("joinroom", async ({ room }: any) => {
+    socket.join(room);
+  });
+  // ====================== Messages
   socket.on("sendmessage", async ({ message, room }: any) => {
     const newMessage = new MessageSchema({
-      sender: {
-        _id: socket.user!._id,
-        firstname: socket.user!.firstname,
-        lastname: socket.user!.lastname,
-        avatar: socket.user!.avatar,
-      },
+      sender: socket.user!._id,
       message: message,
     });
     const chatHistory = await ChatSchema.findByIdAndUpdate(
@@ -35,10 +34,30 @@ io.on("connection", async (socket: any) => {
         $push: { history: newMessage },
       },
       { new: true },
-    );
+    ).populate([
+      {
+        path: "members",
+        select: ["firstname", "lastname", "avatar"],
+      },
+      {
+        path: "history.sender",
+        select: ["firstname", "lastname", "avatar"],
+      },
+    ]);
     const allChats = await ChatSchema.find({
-      "members._id": socket.user._id,
-    }).sort("-updatedAt");
+      members: socket.user._id,
+    })
+      .sort("-updatedAt")
+      .populate([
+        {
+          path: "members",
+          select: ["firstname", "lastname", "avatar"],
+        },
+        {
+          path: "history.sender",
+          select: ["firstname", "lastname", "avatar"],
+        },
+      ]);
     io.in(room).emit("message", { chatHistory, allChats });
   });
   //========

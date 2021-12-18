@@ -21,7 +21,16 @@ const storage = new CloudinaryStorage({
 const chatRoute = express.Router();
 chatRoute.get("/single/:chatId", authJWT, async (req, res, next) => {
   try {
-    const chat = await ChatSchema.findById(req.params.chatId);
+    const chat = await ChatSchema.findById(req.params.chatId).populate([
+      {
+        path: "members",
+        select: ["firstname", "lastname", "avatar"],
+      },
+      {
+        path: "history.sender",
+        select: ["firstname", "lastname", "avatar"],
+      },
+    ]);
     if (chat) {
       res.send(chat);
     } else {
@@ -34,8 +43,19 @@ chatRoute.get("/single/:chatId", authJWT, async (req, res, next) => {
 chatRoute.get("/userChats", authJWT, async (req: any, res, next) => {
   try {
     const allChats = await ChatSchema.find({
-      "members._id": req.user._id,
-    }).sort("-updatedAt");
+      members: req.user._id,
+    })
+      .sort("-updatedAt")
+      .populate([
+        {
+          path: "members",
+          select: ["firstname", "lastname", "avatar"],
+        },
+        {
+          path: "history.sender",
+          select: ["firstname", "lastname", "avatar"],
+        },
+      ]);
     if (allChats) {
       res.send(allChats);
     } else {
@@ -57,7 +77,16 @@ chatRoute.put("/single/:chatId", authJWT, async (req: any, res, next) => {
       req.params.chatId,
       req.body,
       { new: true },
-    );
+    ).populate([
+      {
+        path: "members",
+        select: ["firstname", "lastname", "avatar"],
+      },
+      {
+        path: "history.sender",
+        select: ["firstname", "lastname", "avatar"],
+      },
+    ]);
     res.send(chat);
   } catch (error) {
     next(createHttpError(500, error as any));
@@ -73,7 +102,16 @@ chatRoute.put(
         req.params.chatId,
         req.body,
         { new: true },
-      );
+      ).populate([
+        {
+          path: "members",
+          select: ["firstname", "lastname", "avatar"],
+        },
+        {
+          path: "history.sender",
+          select: ["firstname", "lastname", "avatar"],
+        },
+      ]);
       res.send(chat);
     } catch (error) {
       next(createHttpError(500, error as any));
@@ -86,31 +124,32 @@ chatRoute.post("/createChat/:userId", authJWT, async (req: any, res, next) => {
     const addedUser = await UserSchema.findById(req.params.userId);
     const checkCreatedChat = await ChatSchema.find({
       $and: [
-        { "members._id": req.user._id },
-        { "members._id": new ObjectId(req.params.userId) },
+        { members: req.user._id },
+        { members: new ObjectId(req.params.userId) },
       ],
     });
     if (checkCreatedChat.length === 0) {
-      const membersArray = [
-        {
-          _id: req.user!._id,
-          firstname: req.user!.firstname,
-          lastname: req.user!.lastname,
-          avatar: req.user!.avatar,
-        },
-        {
-          _id: new ObjectId(addedUser!._id),
-          firstname: addedUser!.firstname,
-          lastname: addedUser!.lastname,
-          avatar: addedUser!.avatar,
-        },
-      ];
-      const newChat = new ChatSchema({ ...req.body, members: membersArray });
+      const membersArray = [req.user!._id, new ObjectId(addedUser!._id)];
+      const newChat = new ChatSchema({
+        ...req.body,
+        members: membersArray,
+      });
       await newChat.save();
       const allChats = await ChatSchema.find({
-        "members._id": req.user._id,
-      }).sort("-updatedAt");
-      res.send({ newChat, allChats });
+        members: req.user._id,
+      })
+        .sort("-updatedAt")
+        .populate([
+          {
+            path: "members",
+            select: ["firstname", "lastname", "avatar"],
+          },
+          {
+            path: "history.sender",
+            select: ["firstname", "lastname", "avatar"],
+          },
+        ]);
+      res.send({ newChat: allChats[0], allChats });
     } else {
       next(createHttpError(400, "Chat already created"));
     }
@@ -129,19 +168,34 @@ chatRoute.post(
         req.params.chatId,
         {
           $push: {
-            members: {
-              _id: addedUser!._id,
-              firstname: addedUser!.firstname,
-              lastname: addedUser!.lastname,
-              avatar: addedUser!.avatar,
-            },
+            members: addedUser!._id,
           },
         },
         { new: true },
-      );
+      ).populate([
+        {
+          path: "members",
+          select: ["firstname", "lastname", "avatar"],
+        },
+        {
+          path: "history.sender",
+          select: ["firstname", "lastname", "avatar"],
+        },
+      ]);
       const allChats = await ChatSchema.find({
-        "members._id": req.user._id,
-      }).sort("-updatedAt");
+        members: req.user._id,
+      })
+        .sort("-updatedAt")
+        .populate([
+          {
+            path: "members",
+            select: ["firstname", "lastname", "avatar"],
+          },
+          {
+            path: "history.sender",
+            select: ["firstname", "lastname", "avatar"],
+          },
+        ]);
       res.send({ chat, allChats });
     } catch (error) {
       // console.log(error)
@@ -157,13 +211,33 @@ chatRoute.delete(
       const Mychat = await ChatSchema.findByIdAndUpdate(
         req.params.chatId,
         {
-          $pull: { members: { _id: new ObjectId(req.params.userId) } },
+          $pull: { members: new ObjectId(req.params.userId) },
         },
         { new: true },
-      );
+      ).populate([
+        {
+          path: "members",
+          select: ["firstname", "lastname", "avatar"],
+        },
+        {
+          path: "history.sender",
+          select: ["firstname", "lastname", "avatar"],
+        },
+      ]);
       const Chats = await ChatSchema.find({
-        "members._id": req.user._id,
-      }).sort("-updatedAt");
+        members: req.user._id,
+      })
+        .sort("-updatedAt")
+        .populate([
+          {
+            path: "members",
+            select: ["firstname", "lastname", "avatar"],
+          },
+          {
+            path: "history.sender",
+            select: ["firstname", "lastname", "avatar"],
+          },
+        ]);
       res.send({ chat: Mychat, allChats: Chats });
     } catch (error) {
       // console.log(error);
@@ -178,8 +252,19 @@ chatRoute.delete(
     try {
       const delChat = await ChatSchema.findByIdAndDelete(req.params.chatId);
       const allChats = await ChatSchema.find({
-        "members._id": req.user._id,
-      }).sort("-updatedAt");
+        members: req.user._id,
+      })
+        .sort("-updatedAt")
+        .populate([
+          {
+            path: "members",
+            select: ["firstname", "lastname", "avatar"],
+          },
+          {
+            path: "history.sender",
+            select: ["firstname", "lastname", "avatar"],
+          },
+        ]);
       res.send({ chat: allChats[0], allChats });
     } catch (error) {
       next(createHttpError(500, error as any));

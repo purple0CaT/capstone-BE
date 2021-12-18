@@ -24,7 +24,20 @@ postRoute.get("/", authJWT, async (req, res, next) => {
   try {
     const allPosts = await PostSchema.find({})
       .sort("-createdAt")
-      .populate("comments");
+      .populate([
+        {
+          path: "comments",
+          populate: {
+            path: "author",
+            select: ["firstname", "lastname", "avatar"],
+          },
+        },
+        {
+          path: "comments.author",
+          select: ["firstname", "lastname", "avatar"],
+        },
+      ]);
+
     res.send(allPosts);
   } catch (error) {
     next(createHttpError(500, error as Error));
@@ -32,9 +45,19 @@ postRoute.get("/", authJWT, async (req, res, next) => {
 });
 postRoute.get("/single/:postId", authJWT, async (req, res, next) => {
   try {
-    const post = await PostSchema.findById(req.params.postId).populate(
-      "comments",
-    );
+    const post = await PostSchema.findById(req.params.postId).populate([
+      {
+        path: "comments",
+        populate: {
+          path: "author",
+          select: ["firstname", "lastname", "avatar"],
+        },
+      },
+      {
+        path: "comments.author",
+        select: ["firstname", "lastname", "avatar"],
+      },
+    ]);
     res.send(post);
   } catch (error) {
     next(createHttpError(500, error as Error));
@@ -45,7 +68,20 @@ postRoute.get("/userPosts/:userId", authJWT, async (req, res, next) => {
     const post = await PostSchema.find({
       "author._id": new ObjectId(req.params.userId),
     })
-      .populate("comments")
+      .populate([
+        {
+          path: "comments",
+          populate: {
+            path: "author",
+            select: ["firstname", "lastname", "avatar"],
+          },
+        },
+        {
+          path: "comments.author",
+          select: ["firstname", "lastname", "avatar"],
+        },
+      ])
+
       .sort("-createdAt");
     res.send(post);
   } catch (error) {
@@ -82,12 +118,7 @@ postRoute.post(
       const newPost = new PostSchema({
         ...req.body,
         media: req.file.path,
-        author: {
-          _id: req.user._id,
-          firstname: req.user.firstname,
-          lastname: req.user.lastname,
-          avatar: req.user.avatar,
-        },
+        author: req.user._id,
       });
       await newPost.save();
       res.send(newPost);

@@ -6,21 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const { Schema, model } = mongoose_1.default;
 const FollowSchema = new Schema({
-    followers: [
-        {
-            _id: { type: Object },
-            firstname: { type: String },
-            lastname: { type: String },
-            avatar: { type: String },
-        },
-    ],
-    youFollow: [
-        {
-            _id: { type: Object },
-            firstname: { type: String },
-            lastname: { type: String },
-            avatar: { type: String },
-        },
-    ],
+    followers: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    youFollow: [{ type: Schema.Types.ObjectId, ref: "User" }],
 });
 exports.default = model("Follower", FollowSchema);

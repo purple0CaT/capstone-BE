@@ -28,6 +28,7 @@ userRoute
           $or: [
             { firstname: { $regex: `${search}`, $options: "i" } },
             { lastname: { $regex: `${search}`, $options: "i" } },
+            { nickname: { $regex: `${search}`, $options: "i" } },
           ],
         }).select(["_id", "firstname", "lastname", "email", "avatar"]);
       } else {
@@ -59,8 +60,14 @@ userRoute
 userRoute.get("/me", authJWT, async (req: any, res, next) => {
   try {
     const followers = await FollowSchema.findById(req.user.followers).populate([
-      "followers",
-      "youFollow",
+      {
+        path: "followers",
+        select: ["firstname", "lastname", "avatar"],
+      },
+      {
+        path: "youFollow",
+        select: ["firstname", "lastname", "avatar"],
+      },
     ]);
     res.send({ user: req.user, followers });
   } catch (error) {
@@ -113,8 +120,14 @@ userRoute.get("/single/:userId", authJWT, async (req, res, next) => {
       "booking",
     ]);
     const followers = await FollowSchema.findById(user!.followers).populate([
-      "followers",
-      "youFollow",
+      {
+        path: "followers",
+        select: ["firstname", "lastname", "avatar"],
+      },
+      {
+        path: "youFollow",
+        select: ["firstname", "lastname", "avatar"],
+      },
     ]);
     res.send({ user, followers });
   } catch (error) {
@@ -128,8 +141,14 @@ userRoute.put("/single/:userId", authJWT, async (req, res, next) => {
       req.body,
     );
     const followers = await FollowSchema.findById(user!.followers).populate([
-      "followers",
-      "youFollow",
+      {
+        path: "followers",
+        select: ["firstname", "lastname", "avatar"],
+      },
+      {
+        path: "youFollow",
+        select: ["firstname", "lastname", "avatar"],
+      },
     ]);
     res.send({ user, followers });
   } catch (error) {

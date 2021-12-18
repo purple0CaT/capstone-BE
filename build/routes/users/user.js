@@ -41,6 +41,7 @@ userRoute
                 $or: [
                     { firstname: { $regex: `${search}`, $options: "i" } },
                     { lastname: { $regex: `${search}`, $options: "i" } },
+                    { nickname: { $regex: `${search}`, $options: "i" } },
                 ],
             }).select(["_id", "firstname", "lastname", "email", "avatar"]);
         }
@@ -76,8 +77,14 @@ userRoute
 userRoute.get("/me", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const followers = yield schema_2.default.findById(req.user.followers).populate([
-            "followers",
-            "youFollow",
+            {
+                path: "followers",
+                select: ["firstname", "lastname", "avatar"],
+            },
+            {
+                path: "youFollow",
+                select: ["firstname", "lastname", "avatar"],
+            },
         ]);
         res.send({ user: req.user, followers });
     }
@@ -115,8 +122,14 @@ userRoute.get("/single/:userId", tokenCheck_1.authJWT, (req, res, next) => __awa
             "booking",
         ]);
         const followers = yield schema_2.default.findById(user.followers).populate([
-            "followers",
-            "youFollow",
+            {
+                path: "followers",
+                select: ["firstname", "lastname", "avatar"],
+            },
+            {
+                path: "youFollow",
+                select: ["firstname", "lastname", "avatar"],
+            },
         ]);
         res.send({ user, followers });
     }
@@ -128,8 +141,14 @@ userRoute.put("/single/:userId", tokenCheck_1.authJWT, (req, res, next) => __awa
     try {
         const user = yield schema_1.default.findByIdAndUpdate(req.params.userId, req.body);
         const followers = yield schema_2.default.findById(user.followers).populate([
-            "followers",
-            "youFollow",
+            {
+                path: "followers",
+                select: ["firstname", "lastname", "avatar"],
+            },
+            {
+                path: "youFollow",
+                select: ["firstname", "lastname", "avatar"],
+            },
         ]);
         res.send({ user, followers });
     }
