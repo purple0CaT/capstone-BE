@@ -16,11 +16,11 @@ const createJWT = (payload: any) =>
     jwt.sign(
       payload,
       process.env.JWT_SECRET!,
-      { expiresIn: "2d" },
+      { expiresIn: "3d" },
       (err, token) => {
         if (err) rej(err);
         else res(token);
-      }
+      },
     );
   });
 const createRefreshJWT = (payload: any) =>
@@ -32,7 +32,7 @@ const createRefreshJWT = (payload: any) =>
       (err, token) => {
         if (err) rej(err);
         else res(token);
-      }
+      },
     );
   });
 // verify token
