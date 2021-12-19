@@ -46,7 +46,7 @@ postRoute.get("/", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, v
                 },
             },
             {
-                path: "comments.author",
+                path: "author",
                 select: ["firstname", "lastname", "avatar"],
             },
         ]);
@@ -67,7 +67,7 @@ postRoute.get("/single/:postId", tokenCheck_1.authJWT, (req, res, next) => __awa
                 },
             },
             {
-                path: "comments.author",
+                path: "author",
                 select: ["firstname", "lastname", "avatar"],
             },
         ]);
@@ -91,7 +91,7 @@ postRoute.get("/userPosts/:userId", tokenCheck_1.authJWT, (req, res, next) => __
                 },
             },
             {
-                path: "comments.author",
+                path: "author",
                 select: ["firstname", "lastname", "avatar"],
             },
         ])
@@ -135,7 +135,19 @@ postRoute.post("/", tokenCheck_1.authJWT, (0, multer_1.default)({ storage: stora
 }));
 postRoute.put("/single/:postId", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const post = yield schema_1.default.findByIdAndUpdate(req.params.postId, req.body, { new: true }).populate("author");
+        const post = yield schema_1.default.findByIdAndUpdate(req.params.postId, req.body, { new: true }).populate([
+            {
+                path: "comments",
+                populate: {
+                    path: "author",
+                    select: ["firstname", "lastname", "avatar"],
+                },
+            },
+            {
+                path: "author",
+                select: ["firstname", "lastname", "avatar"],
+            },
+        ]);
         res.send(post);
     }
     catch (error) {

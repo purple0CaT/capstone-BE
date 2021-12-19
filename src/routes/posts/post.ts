@@ -33,7 +33,7 @@ postRoute.get("/", authJWT, async (req, res, next) => {
           },
         },
         {
-          path: "comments.author",
+          path: "author",
           select: ["firstname", "lastname", "avatar"],
         },
       ]);
@@ -54,7 +54,7 @@ postRoute.get("/single/:postId", authJWT, async (req, res, next) => {
         },
       },
       {
-        path: "comments.author",
+        path: "author",
         select: ["firstname", "lastname", "avatar"],
       },
     ]);
@@ -77,7 +77,7 @@ postRoute.get("/userPosts/:userId", authJWT, async (req, res, next) => {
           },
         },
         {
-          path: "comments.author",
+          path: "author",
           select: ["firstname", "lastname", "avatar"],
         },
       ])
@@ -134,7 +134,19 @@ postRoute.put("/single/:postId", async (req, res, next) => {
       req.params.postId,
       req.body,
       { new: true },
-    ).populate("author");
+    ).populate([
+      {
+        path: "comments",
+        populate: {
+          path: "author",
+          select: ["firstname", "lastname", "avatar"],
+        },
+      },
+      {
+        path: "author",
+        select: ["firstname", "lastname", "avatar"],
+      },
+    ]);
     res.send(post);
   } catch (error) {
     next(createHttpError(500, error as Error));

@@ -20,7 +20,8 @@ io.on("connection", async (socket: any) => {
   });
   // === Join specific room
   socket.on("joinroom", async ({ room }: any) => {
-    socket.join(room);
+    console.log("Test");
+    socket.join(room.toString());
   });
   // ====================== Messages
   socket.on("sendmessage", async ({ message, room }: any) => {
@@ -28,7 +29,7 @@ io.on("connection", async (socket: any) => {
       sender: socket.user!._id,
       message: message,
     });
-    const chatHistory = await ChatSchema.findByIdAndUpdate(
+    await ChatSchema.findByIdAndUpdate(
       room,
       {
         $push: { history: newMessage },
@@ -58,7 +59,8 @@ io.on("connection", async (socket: any) => {
           select: ["firstname", "lastname", "avatar"],
         },
       ]);
-    io.in(room).emit("message", { chatHistory, allChats });
+    console.log("=>", allChats);
+    io.in(room).emit("message", { chatHistory: allChats[0], allChats });
   });
   //========
   socket.on("disconnect", async () => {

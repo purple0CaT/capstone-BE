@@ -34,7 +34,8 @@ io.on("connection", (socket) => __awaiter(void 0, void 0, void 0, function* () {
     });
     // === Join specific room
     socket.on("joinroom", ({ room }) => __awaiter(void 0, void 0, void 0, function* () {
-        socket.join(room);
+        console.log("Test");
+        socket.join(room.toString());
     }));
     // ====================== Messages
     socket.on("sendmessage", ({ message, room }) => __awaiter(void 0, void 0, void 0, function* () {
@@ -42,7 +43,7 @@ io.on("connection", (socket) => __awaiter(void 0, void 0, void 0, function* () {
             sender: socket.user._id,
             message: message,
         });
-        const chatHistory = yield schema_1.default.findByIdAndUpdate(room, {
+        yield schema_1.default.findByIdAndUpdate(room, {
             $push: { history: newMessage },
         }, { new: true }).populate([
             {
@@ -68,7 +69,8 @@ io.on("connection", (socket) => __awaiter(void 0, void 0, void 0, function* () {
                 select: ["firstname", "lastname", "avatar"],
             },
         ]);
-        io.in(room).emit("message", { chatHistory, allChats });
+        console.log("=>", allChats);
+        io.in(room).emit("message", { chatHistory: allChats[0], allChats });
     }));
     //========
     socket.on("disconnect", () => __awaiter(void 0, void 0, void 0, function* () {
