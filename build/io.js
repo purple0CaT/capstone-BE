@@ -34,7 +34,7 @@ io.on("connection", (socket) => __awaiter(void 0, void 0, void 0, function* () {
     });
     // === Join specific room
     socket.on("joinroom", ({ room }) => __awaiter(void 0, void 0, void 0, function* () {
-        console.log("Test");
+        // console.log("Test");
         socket.join(room.toString());
     }));
     // ====================== Messages
@@ -69,12 +69,11 @@ io.on("connection", (socket) => __awaiter(void 0, void 0, void 0, function* () {
                 select: ["firstname", "lastname", "avatar"],
             },
         ]);
-        console.log("=>", allChats);
+        // console.log("=>", allChats);
         io.in(room).emit("message", { chatHistory: allChats[0], allChats });
     }));
     //========
     socket.on("disconnect", () => __awaiter(void 0, void 0, void 0, function* () {
-        // console.log("disconnected socket " + socket.id);
         const user = yield schema_2.default.findById(socket.user._id);
         user.socket = null;
         yield user.save();

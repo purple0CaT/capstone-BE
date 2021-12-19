@@ -47,7 +47,7 @@ postRoute.get("/", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, v
             },
             {
                 path: "author",
-                select: ["firstname", "lastname", "avatar"],
+                select: ["firstname", "lastname", "avatar", "creator"],
             },
         ]);
         res.send(allPosts);
@@ -68,7 +68,7 @@ postRoute.get("/single/:postId", tokenCheck_1.authJWT, (req, res, next) => __awa
             },
             {
                 path: "author",
-                select: ["firstname", "lastname", "avatar"],
+                select: ["firstname", "lastname", "avatar", "creator"],
             },
         ]);
         res.send(post);
@@ -80,7 +80,7 @@ postRoute.get("/single/:postId", tokenCheck_1.authJWT, (req, res, next) => __awa
 postRoute.get("/userPosts/:userId", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const post = yield schema_1.default.find({
-            "author._id": new ObjectId(req.params.userId),
+            author: new ObjectId(req.params.userId),
         })
             .populate([
             {
@@ -92,7 +92,7 @@ postRoute.get("/userPosts/:userId", tokenCheck_1.authJWT, (req, res, next) => __
             },
             {
                 path: "author",
-                select: ["firstname", "lastname", "avatar"],
+                select: ["firstname", "lastname", "avatar", "creator"],
             },
         ])
             .sort("-createdAt");
@@ -145,7 +145,7 @@ postRoute.put("/single/:postId", (req, res, next) => __awaiter(void 0, void 0, v
             },
             {
                 path: "author",
-                select: ["firstname", "lastname", "avatar"],
+                select: ["firstname", "lastname", "avatar", "creator"],
             },
         ]);
         res.send(post);
@@ -156,7 +156,7 @@ postRoute.put("/single/:postId", (req, res, next) => __awaiter(void 0, void 0, v
 }));
 postRoute.delete("/single/:postId", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const post = yield schema_1.default.findByIdAndDelete(req.params.postId);
+        yield schema_1.default.findByIdAndDelete(req.params.postId);
         res.status(201).send({ message: "Deleted!" });
     }
     catch (error) {

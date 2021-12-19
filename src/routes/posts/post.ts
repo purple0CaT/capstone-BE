@@ -34,7 +34,7 @@ postRoute.get("/", authJWT, async (req, res, next) => {
         },
         {
           path: "author",
-          select: ["firstname", "lastname", "avatar"],
+          select: ["firstname", "lastname", "avatar", "creator"],
         },
       ]);
 
@@ -55,7 +55,7 @@ postRoute.get("/single/:postId", authJWT, async (req, res, next) => {
       },
       {
         path: "author",
-        select: ["firstname", "lastname", "avatar"],
+        select: ["firstname", "lastname", "avatar", "creator"],
       },
     ]);
     res.send(post);
@@ -66,7 +66,7 @@ postRoute.get("/single/:postId", authJWT, async (req, res, next) => {
 postRoute.get("/userPosts/:userId", authJWT, async (req, res, next) => {
   try {
     const post = await PostSchema.find({
-      "author._id": new ObjectId(req.params.userId),
+      author: new ObjectId(req.params.userId),
     })
       .populate([
         {
@@ -78,7 +78,7 @@ postRoute.get("/userPosts/:userId", authJWT, async (req, res, next) => {
         },
         {
           path: "author",
-          select: ["firstname", "lastname", "avatar"],
+          select: ["firstname", "lastname", "avatar", "creator"],
         },
       ])
 
@@ -144,7 +144,7 @@ postRoute.put("/single/:postId", async (req, res, next) => {
       },
       {
         path: "author",
-        select: ["firstname", "lastname", "avatar"],
+        select: ["firstname", "lastname", "avatar", "creator"],
       },
     ]);
     res.send(post);
@@ -154,7 +154,7 @@ postRoute.put("/single/:postId", async (req, res, next) => {
 });
 postRoute.delete("/single/:postId", async (req, res, next) => {
   try {
-    const post = await PostSchema.findByIdAndDelete(req.params.postId);
+    await PostSchema.findByIdAndDelete(req.params.postId);
     res.status(201).send({ message: "Deleted!" });
   } catch (error) {
     next(createHttpError(500, error as Error));

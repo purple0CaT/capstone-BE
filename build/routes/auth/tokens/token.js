@@ -27,7 +27,7 @@ const generateJWT = (user) => __awaiter(void 0, void 0, void 0, function* () {
 exports.generateJWT = generateJWT;
 //  GENERATE TOKENS
 const createJWT = (payload) => new Promise((res, rej) => {
-    jsonwebtoken_1.default.sign(payload, process.env.JWT_SECRET, { expiresIn: "2d" }, (err, token) => {
+    jsonwebtoken_1.default.sign(payload, process.env.JWT_SECRET, { expiresIn: "3d" }, (err, token) => {
         if (err)
             rej(err);
         else

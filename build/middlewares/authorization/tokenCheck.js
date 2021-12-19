@@ -29,7 +29,6 @@ const authJWT = (req, res, next) => __awaiter(void 0, void 0, void 0, function* 
             });
             if (user) {
                 req.user = user;
-                // console.log(user);
                 next();
             }
             else {
@@ -37,8 +36,7 @@ const authJWT = (req, res, next) => __awaiter(void 0, void 0, void 0, function* 
             }
         }
         catch (error) {
-            // console.log(error)
-            next((0, http_errors_1.default)(500, error));
+            next((0, http_errors_1.default)(400, "Relogin"));
         }
     }
 });

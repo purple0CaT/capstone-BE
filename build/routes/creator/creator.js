@@ -53,17 +53,17 @@ creatorRoute.post("/beCreator", tokenCheck_1.authJWT, (req, res, next) => __awai
         }
         else {
             const newItem1 = new schema_1.ItemsSchema({
-                title: "Landscape printed picture",
+                title: "Landscape canvas",
                 price: 10,
-                description: "Landscape printed picture of selected post with ratio: 16:9",
+                description: "Landscape canvas of selected post with ratio: 16:9, size: 100/57cm",
                 quantity: 99,
                 sellerId: req.user._id,
                 imgRatio: "16/9",
             });
             const newItem2 = new schema_1.ItemsSchema({
-                title: "Portret printed picture",
+                title: "Portrait canvas",
                 price: 10,
-                description: "Portret printed picture of selected post with ratio: 3:4",
+                description: "Portrait canvas of selected post with ratio: 3:4,size: 75/100cm",
                 quantity: 99,
                 sellerId: req.user._id,
                 imgRatio: "3/4",
