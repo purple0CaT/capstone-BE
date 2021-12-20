@@ -41,18 +41,19 @@ creatorRoute.post("/beCreator", authJWT, async (req: any, res, next) => {
       next(createHttpError(400, " You are already a creator!"));
     } else {
       const newItem1 = new ItemsSchema({
-        title: "Landscape printed picture",
+        title: "Landscape canvas",
         price: 10,
         description:
-          "Landscape printed picture of selected post with ratio: 16:9",
+          "Landscape canvas of selected post with ratio: 16:9, size: 100/57cm",
         quantity: 99,
         sellerId: req.user._id,
         imgRatio: "16/9",
       });
       const newItem2 = new ItemsSchema({
-        title: "Portret printed picture",
+        title: "Portrait canvas",
         price: 10,
-        description: "Portret printed picture of selected post with ratio: 3:4",
+        description:
+          "Portrait canvas of selected post with ratio: 3:4,size: 75/100cm",
         quantity: 99,
         sellerId: req.user._id,
         imgRatio: "3/4",

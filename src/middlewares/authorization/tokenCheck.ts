@@ -15,14 +15,12 @@ export const authJWT = async (req: any, res: any, next: NextFunction) => {
       });
       if (user) {
         req.user = user;
-        // console.log(user);
         next();
       } else {
         next(createHttpError(404, "User not found!"));
       }
     } catch (error) {
-      // console.log(error)
-      next(createHttpError(500, error as any));
+      next(createHttpError(400, "Relogin"));
     }
   }
 };

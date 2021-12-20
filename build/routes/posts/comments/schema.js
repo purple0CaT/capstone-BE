@@ -7,11 +7,6 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const { Schema, model } = mongoose_1.default;
 const CommentSchema = new Schema({
     text: { type: String, required: true },
-    author: {
-        _id: { type: Object },
-        firstname: { type: String },
-        lastname: { type: String },
-        avatar: { type: String },
-    },
+    author: { type: Schema.Types.ObjectId, ref: "User", required: true },
 }, { timestamps: true });
 exports.default = model("Comment", CommentSchema);

@@ -13,37 +13,57 @@ io.use(ioAuthorization as any);
 
 io.on("connection", async (socket: any) => {
   const chats = await ChatSchema.find({
-    "members._id": socket.user._id,
+    members: socket.user._id,
   });
   chats.map((chat) => {
     socket.join(chat._id.toString());
   });
-  // ======================
+  // === Join specific room
+  socket.on("joinroom", async ({ room }: any) => {
+    // console.log("Test");
+    socket.join(room.toString());
+  });
+  // ====================== Messages
   socket.on("sendmessage", async ({ message, room }: any) => {
     const newMessage = new MessageSchema({
-      sender: {
-        _id: socket.user!._id,
-        firstname: socket.user!.firstname,
-        lastname: socket.user!.lastname,
-        avatar: socket.user!.avatar,
-      },
+      sender: socket.user!._id,
       message: message,
     });
-    const chatHistory = await ChatSchema.findByIdAndUpdate(
+    await ChatSchema.findByIdAndUpdate(
       room,
       {
         $push: { history: newMessage },
       },
       { new: true },
-    );
+    ).populate([
+      {
+        path: "members",
+        select: ["firstname", "lastname", "avatar"],
+      },
+      {
+        path: "history.sender",
+        select: ["firstname", "lastname", "avatar"],
+      },
+    ]);
     const allChats = await ChatSchema.find({
-      "members._id": socket.user._id,
-    }).sort("-updatedAt");
-    io.in(room).emit("message", { chatHistory, allChats });
+      members: socket.user._id,
+    })
+      .sort("-updatedAt")
+      .populate([
+        {
+          path: "members",
+          select: ["firstname", "lastname", "avatar"],
+        },
+        {
+          path: "history.sender",
+          select: ["firstname", "lastname", "avatar"],
+        },
+      ]);
+    // console.log("=>", allChats);
+    io.in(room).emit("message", { chatHistory: allChats[0], allChats });
   });
   //========
   socket.on("disconnect", async () => {
-    // console.log("disconnected socket " + socket.id);
     const user: any = await UserSchema.findById(socket.user._id);
     user.socket = null;
     await user.save();

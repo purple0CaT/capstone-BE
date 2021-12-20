@@ -27,33 +27,53 @@ const io = new socket_io_1.Server(exports.httpServer, { allowEIO3: true });
 io.use(socket_1.ioAuthorization);
 io.on("connection", (socket) => __awaiter(void 0, void 0, void 0, function* () {
     const chats = yield schema_1.default.find({
-        "members._id": socket.user._id,
+        members: socket.user._id,
     });
     chats.map((chat) => {
         socket.join(chat._id.toString());
     });
-    // ======================
+    // === Join specific room
+    socket.on("joinroom", ({ room }) => __awaiter(void 0, void 0, void 0, function* () {
+        // console.log("Test");
+        socket.join(room.toString());
+    }));
+    // ====================== Messages
     socket.on("sendmessage", ({ message, room }) => __awaiter(void 0, void 0, void 0, function* () {
         const newMessage = new models_1.default({
-            sender: {
-                _id: socket.user._id,
-                firstname: socket.user.firstname,
-                lastname: socket.user.lastname,
-                avatar: socket.user.avatar,
-            },
+            sender: socket.user._id,
             message: message,
         });
-        const chatHistory = yield schema_1.default.findByIdAndUpdate(room, {
+        yield schema_1.default.findByIdAndUpdate(room, {
             $push: { history: newMessage },
-        }, { new: true });
+        }, { new: true }).populate([
+            {
+                path: "members",
+                select: ["firstname", "lastname", "avatar"],
+            },
+            {
+                path: "history.sender",
+                select: ["firstname", "lastname", "avatar"],
+            },
+        ]);
         const allChats = yield schema_1.default.find({
-            "members._id": socket.user._id,
-        }).sort("-updatedAt");
-        io.in(room).emit("message", { chatHistory, allChats });
+            members: socket.user._id,
+        })
+            .sort("-updatedAt")
+            .populate([
+            {
+                path: "members",
+                select: ["firstname", "lastname", "avatar"],
+            },
+            {
+                path: "history.sender",
+                select: ["firstname", "lastname", "avatar"],
+            },
+        ]);
+        // console.log("=>", allChats);
+        io.in(room).emit("message", { chatHistory: allChats[0], allChats });
     }));
     //========
     socket.on("disconnect", () => __awaiter(void 0, void 0, void 0, function* () {
-        // console.log("disconnected socket " + socket.id);
         const user = yield schema_2.default.findById(socket.user._id);
         user.socket = null;
         yield user.save();

@@ -26,6 +26,7 @@ registerRoute.post("/", async (req, res, next) => {
       .status(201)
       .send({ user: newUser, tokens: { accessToken, refreshToken } });
   } catch (error) {
+    console.log(error);
     next(createHttpError(400, "Fill all fields"));
   }
 });
