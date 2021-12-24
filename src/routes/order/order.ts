@@ -219,12 +219,10 @@ orderRoute.get(
   async (req: any, res, next) => {
     try {
       const order = await OrderSchema.findById(req.params.orderId);
-      // if (req.user._id.toString() !== order.customerId.toString()) {
-      //   next(createHttpError(400, "You cannot purchase this order!"));
-      // } else {
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         mode: "payment",
+        locale: "en-GB",
         client_reference_id: order._id.toString(),
         line_items: order.items.map((I: any) => {
           return {

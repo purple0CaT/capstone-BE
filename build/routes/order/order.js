@@ -176,12 +176,10 @@ orderRoute.get("/checkout-session/:orderId",
 (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const order = yield schema_4.default.findById(req.params.orderId);
-        // if (req.user._id.toString() !== order.customerId.toString()) {
-        //   next(createHttpError(400, "You cannot purchase this order!"));
-        // } else {
         const session = yield stripe.checkout.sessions.create({
             payment_method_types: ["card"],
             mode: "payment",
+            locale: "en-GB",
             client_reference_id: order._id.toString(),
             line_items: order.items.map((I) => {
                 return {
