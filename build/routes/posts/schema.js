@@ -11,7 +11,10 @@ const PostSchema = new Schema({
     media: { type: String, required: true },
     author: { type: Schema.Types.ObjectId, ref: "User", required: true },
     likes: [{ type: String, required: false }],
-    location: { type: String, required: false },
+    location: {
+        title: { type: String, required: false },
+        cord: [{ type: String, required: false }],
+    },
     comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
 }, { timestamps: true });
 exports.default = model("Post", PostSchema);

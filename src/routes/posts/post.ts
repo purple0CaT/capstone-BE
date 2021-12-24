@@ -115,8 +115,20 @@ postRoute.post(
   multer({ storage: storage }).single("media"),
   async (req: any, res, next) => {
     try {
+      let editBody;
+      if (req.body.locCord) {
+        editBody = {
+          text: req.body.text,
+          location: {
+            title: req.body.locTitle,
+            cord: req.body.locCord.split(", "),
+          },
+        };
+      } else {
+        editBody = req.body;
+      }
       const newPost = new PostSchema({
-        ...req.body,
+        ...editBody,
         media: req.file.path,
         author: req.user._id,
       });

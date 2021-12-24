@@ -125,7 +125,20 @@ postRoute.post("/likes/:postId", tokenCheck_1.authJWT, (req, res, next) => __awa
 //
 postRoute.post("/", tokenCheck_1.authJWT, (0, multer_1.default)({ storage: storage }).single("media"), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const newPost = new schema_1.default(Object.assign(Object.assign({}, req.body), { media: req.file.path, author: req.user._id }));
+        let editBody;
+        if (req.body.locCord) {
+            editBody = {
+                text: req.body.text,
+                location: {
+                    title: req.body.locTitle,
+                    cord: req.body.locCord.split(", "),
+                },
+            };
+        }
+        else {
+            editBody = req.body;
+        }
+        const newPost = new schema_1.default(Object.assign(Object.assign({}, editBody), { media: req.file.path, author: req.user._id }));
         yield newPost.save();
         res.send(newPost);
     }
