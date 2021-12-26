@@ -50,26 +50,23 @@ postRoute.get("/followed", authJWT, async (req: any, res, next) => {
     const userFollow = followed.youFollow.map((F: any) => ({
       author: F,
     }));
-    if (userFollow.length > 0) {
-      const allPosts = await PostSchema.find({ $or: userFollow })
-        .sort("-createdAt")
-        .populate([
-          {
-            path: "comments",
-            populate: {
-              path: "author",
-              select: ["firstname", "lastname", "avatar"],
-            },
-          },
-          {
+    userFollow.push({ author: req.user._id });
+    const allPosts = await PostSchema.find({ $or: userFollow })
+      .sort("-createdAt")
+      .populate([
+        {
+          path: "comments",
+          populate: {
             path: "author",
-            select: ["firstname", "lastname", "avatar", "creator"],
+            select: ["firstname", "lastname", "avatar"],
           },
-        ]);
-      res.send(allPosts);
-    } else {
-      res.send([]);
-    }
+        },
+        {
+          path: "author",
+          select: ["firstname", "lastname", "avatar", "creator"],
+        },
+      ]);
+    res.send(allPosts);
   } catch (error) {
     next(createHttpError(500, error as Error));
   }

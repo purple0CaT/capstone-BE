@@ -63,27 +63,23 @@ postRoute.get("/followed", tokenCheck_1.authJWT, (req, res, next) => __awaiter(v
         const userFollow = followed.youFollow.map((F) => ({
             author: F,
         }));
-        if (userFollow.length > 0) {
-            const allPosts = yield schema_1.default.find({ $or: userFollow })
-                .sort("-createdAt")
-                .populate([
-                {
-                    path: "comments",
-                    populate: {
-                        path: "author",
-                        select: ["firstname", "lastname", "avatar"],
-                    },
-                },
-                {
+        userFollow.push({ author: req.user._id });
+        const allPosts = yield schema_1.default.find({ $or: userFollow })
+            .sort("-createdAt")
+            .populate([
+            {
+                path: "comments",
+                populate: {
                     path: "author",
-                    select: ["firstname", "lastname", "avatar", "creator"],
+                    select: ["firstname", "lastname", "avatar"],
                 },
-            ]);
-            res.send(allPosts);
-        }
-        else {
-            res.send([]);
-        }
+            },
+            {
+                path: "author",
+                select: ["firstname", "lastname", "avatar", "creator"],
+            },
+        ]);
+        res.send(allPosts);
     }
     catch (error) {
         next((0, http_errors_1.default)(500, error));
