@@ -20,6 +20,7 @@ const multer_storage_cloudinary_1 = require("multer-storage-cloudinary");
 const cloudinary_1 = require("cloudinary");
 const multer_1 = __importDefault(require("multer"));
 const mongoose_1 = __importDefault(require("mongoose"));
+const schema_2 = __importDefault(require("./../followers/schema"));
 //
 const ObjectId = mongoose_1.default.Types.ObjectId;
 //
@@ -51,6 +52,38 @@ postRoute.get("/", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, v
             },
         ]);
         res.send(allPosts);
+    }
+    catch (error) {
+        next((0, http_errors_1.default)(500, error));
+    }
+}));
+postRoute.get("/followed", tokenCheck_1.authJWT, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const followed = yield schema_2.default.findById(req.user.followers);
+        const userFollow = followed.youFollow.map((F) => ({
+            author: F,
+        }));
+        if (userFollow.length > 0) {
+            const allPosts = yield schema_1.default.find({ $or: userFollow })
+                .sort("-createdAt")
+                .populate([
+                {
+                    path: "comments",
+                    populate: {
+                        path: "author",
+                        select: ["firstname", "lastname", "avatar"],
+                    },
+                },
+                {
+                    path: "author",
+                    select: ["firstname", "lastname", "avatar", "creator"],
+                },
+            ]);
+            res.send(allPosts);
+        }
+        else {
+            res.send([]);
+        }
     }
     catch (error) {
         next((0, http_errors_1.default)(500, error));

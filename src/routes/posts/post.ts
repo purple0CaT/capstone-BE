@@ -6,6 +6,7 @@ import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { v2 as cloudinary } from "cloudinary";
 import multer from "multer";
 import mongoose from "mongoose";
+import FollowSchema from "./../followers/schema";
 //
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -39,6 +40,36 @@ postRoute.get("/", authJWT, async (req, res, next) => {
       ]);
 
     res.send(allPosts);
+  } catch (error) {
+    next(createHttpError(500, error as Error));
+  }
+});
+postRoute.get("/followed", authJWT, async (req: any, res, next) => {
+  try {
+    const followed = await FollowSchema.findById(req.user.followers);
+    const userFollow = followed.youFollow.map((F: any) => ({
+      author: F,
+    }));
+    if (userFollow.length > 0) {
+      const allPosts = await PostSchema.find({ $or: userFollow })
+        .sort("-createdAt")
+        .populate([
+          {
+            path: "comments",
+            populate: {
+              path: "author",
+              select: ["firstname", "lastname", "avatar"],
+            },
+          },
+          {
+            path: "author",
+            select: ["firstname", "lastname", "avatar", "creator"],
+          },
+        ]);
+      res.send(allPosts);
+    } else {
+      res.send([]);
+    }
   } catch (error) {
     next(createHttpError(500, error as Error));
   }
