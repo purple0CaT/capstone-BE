@@ -18,13 +18,10 @@ io.on("connection", async (socket: any) => {
   chats.map((chat) => {
     socket.join(chat._id.toString());
   });
-  // === Join specific room
-  socket.on("joinroom", async ({ room }: any) => {
-    // console.log("Test");
-    socket.join(room.toString());
-  });
   // ====================== Messages
   socket.on("sendmessage", async ({ message, room }: any) => {
+    console.log("Message", socket.id);
+    //
     const newMessage = new MessageSchema({
       sender: socket.user!._id,
       message: message,
@@ -59,8 +56,13 @@ io.on("connection", async (socket: any) => {
           select: ["firstname", "lastname", "avatar"],
         },
       ]);
-    // console.log("=>", allChats);
     io.in(room).emit("message", { chatHistory: allChats[0], allChats });
+  });
+  // === Join specific room
+  socket.on("new-chat-created", async ({ chatId }: any) => {
+    socket.join(chatId);
+    // console.log("Join", socket.rooms);
+    console.log("Joining", socket.id);
   });
   //========
   socket.on("disconnect", async () => {
