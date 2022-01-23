@@ -20,7 +20,6 @@ io.on("connection", async (socket: any) => {
   });
   // ====================== Messages
   socket.on("sendmessage", async ({ message, room }: any) => {
-    console.log("Message", socket.id);
     //
     const newMessage = new MessageSchema({
       sender: socket.user!._id,
@@ -61,8 +60,6 @@ io.on("connection", async (socket: any) => {
   // === Join specific room
   socket.on("new-chat-created", async ({ chatId }: any) => {
     socket.join(chatId);
-    // console.log("Join", socket.rooms);
-    console.log("Joining", socket.id);
   });
   //========
   socket.on("disconnect", async () => {
